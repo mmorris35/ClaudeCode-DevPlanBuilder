@@ -1,0 +1,104 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "claude-code-planner"
+version = "0.1.0"
+description = "A CLI tool that generates claude.md and DEVELOPMENT_PLAN.md for Claude Code projects"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Mike Morris", email = "mike@mikemorris.net"}
+]
+keywords = ["claude", "code", "planning", "development", "cli"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "click>=8.1.7",
+    "jinja2>=3.1.2",
+    "pyyaml>=6.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.6",
+    "mypy>=1.7.1",
+    "types-pyyaml>=6.0.12",
+]
+
+[project.scripts]
+claude-planner = "claude_planner.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/mikemorris/claude-code-planner"
+Repository = "https://github.com/mikemorris/claude-code-planner"
+Issues = "https://github.com/mikemorris/claude-code-planner/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["claude_planner*"]
+exclude = ["tests*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "-ra",
+]
+
+[tool.coverage.run]
+source = ["claude_planner"]
+omit = ["*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
