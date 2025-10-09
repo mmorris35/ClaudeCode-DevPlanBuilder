@@ -36,15 +36,43 @@ claude-planner list-templates
 
 ## Installation
 
-Requirements:
+### Requirements
 - Python 3.11 or higher
 - pip
+- virtualenv (recommended)
+
+### For Users
 
 ```bash
-# Development installation
+# Install from PyPI (when published)
+pip install claude-code-planner
+```
+
+### For Development
+
+```bash
+# Clone the repository
 git clone https://github.com/yourusername/claude-code-project-planner.git
 cd claude-code-project-planner
+
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install in editable mode with dev dependencies
 pip install -e ".[dev]"
+
+# Verify installation
+claude-planner --version
+python -c "import claude_planner; print(claude_planner.__version__)"
+```
+
+### Verify Imports
+
+After installation, verify all dependencies are available:
+
+```bash
+python -c "import click; import jinja2; import yaml; import pytest; print('All imports successful!')"
 ```
 
 ## Documentation

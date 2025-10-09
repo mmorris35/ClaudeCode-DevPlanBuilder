@@ -1,0 +1,14 @@
+# Development dependencies for claude-code-planner
+# Install with: pip install -r requirements-dev.txt
+# Or use: pip install -e ".[dev]" to install package + dev dependencies
+
+# Testing
+pytest>=7.4.3
+pytest-cov>=4.1.0
+
+# Code quality
+ruff>=0.1.6
+mypy>=1.7.1
+
+# Type stubs
+types-pyyaml>=6.0.12
