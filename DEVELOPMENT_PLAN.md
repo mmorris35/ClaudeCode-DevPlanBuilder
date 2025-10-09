@@ -56,7 +56,7 @@ please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for cont
 - [x] 0.2.2: CI/CD Pipeline
 
 ### Phase 1: Core Data Models (Week 1, Days 2-3)
-- [ ] 1.1.1: ProjectBrief Dataclass
+- [x] 1.1.1: ProjectBrief Dataclass
 - [ ] 1.1.2: Phase/Task/Subtask Models
 - [ ] 1.1.3: TechStack Model
 - [ ] 1.2.1: Model Validation
@@ -394,6 +394,74 @@ dev = [
   - Triggers: push to main/develop, PRs to main/develop
 - **Branch**: main
 - **Notes**: Workflow ready to run when pushed to GitHub. Includes both test matrix and pre-commit checks. Coverage reporting configured for Codecov integration (optional). Cannot test actual workflow execution without pushing to GitHub, but YAML is valid and follows best practices.
+
+---
+
+## Phase 1: Core Data Models (Week 1, Days 2-3)
+
+**Goal**: Define core data structures for representing project briefs and plans
+
+### Task 1.1: Project Data Models
+
+**Subtask 1.1.1: ProjectBrief Dataclass (Single Session)**
+
+**Prerequisites**: None (Phase 0 complete)
+
+**Deliverables**:
+- [x] Create `claude_planner/models.py` with ProjectBrief dataclass
+- [x] Add all fields from PROJECT_BRIEF.md structure
+- [x] Implement validation methods
+- [x] Create comprehensive unit tests
+- [x] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Python dataclasses for clean data structures
+- Type hints for all fields
+- Validation methods for required fields
+
+**Files to Create**:
+- `claude_planner/models.py` - ProjectBrief dataclass
+- `tests/test_models.py` - Comprehensive tests
+
+**Files to Modify**:
+- None
+
+**Success Criteria**:
+- [x] ProjectBrief dataclass with all fields
+- [x] Validation methods (validate() and is_valid())
+- [x] All tests pass
+- [x] 100% test coverage
+- [x] Linting and type checking pass
+
+---
+
+**Completion Notes**:
+- **Implementation**: Created ProjectBrief dataclass with comprehensive field structure
+- **Files Created**:
+  - `claude_planner/models.py` (48 lines, ProjectBrief dataclass with validation)
+  - `tests/test_models.py` (243 lines, 13 unit tests)
+- **Files Modified**: None
+- **Tests**: 13 unit tests (100% coverage)
+  - test_create_minimal_brief
+  - test_create_full_brief
+  - test_default_values
+  - test_validate_valid_brief
+  - test_validate_missing_project_name
+  - test_validate_missing_project_type
+  - test_validate_missing_primary_goal
+  - test_validate_missing_target_users
+  - test_validate_missing_timeline
+  - test_validate_multiple_missing_fields
+  - test_validate_whitespace_only_fields
+  - test_lists_are_mutable
+  - test_dicts_are_mutable
+- **Build**: ✅ Success
+  - All tests pass (13/13)
+  - Coverage: 100% (48/48 statements)
+  - Ruff linting: Clean (auto-fixed Optional -> X | None)
+  - Mypy type checking: Success
+- **Branch**: main
+- **Notes**: ProjectBrief dataclass complete with all fields from PROJECT_BRIEF.md structure. Includes validation for required fields and supports all optional fields with proper defaults. Ready for parser to populate instances.
 
 ---
 
