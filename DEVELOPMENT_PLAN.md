@@ -746,20 +746,1811 @@ dev = [
 
 ---
 
-## Remaining Phases
+**Subtask 2.1.2: Field Extractor (Single Session)**
 
-Phases 2-10 follow the same pattern with specific subtasks for:
-- Phase 2: Parser (4 subtasks) - IN PROGRESS (2.1.1 complete)
-- Phase 3: Templates (7 subtasks)
-- Phase 4: Generator (5 subtasks)
-- Phase 5: CLI (5 subtasks)
-- Phase 6: Validator (5 subtasks)
-- Phase 7: Git integration (3 subtasks)
-- Phase 8: Testing/docs (6 subtasks)
-- Phase 9: Distribution (4 subtasks)
-- Phase 10: Dogfooding (2 subtasks)
+**Prerequisites**:
+- [x] 2.1.1: Markdown Parser
 
-**Total**: ~50 subtasks over 2 weeks
+**Deliverables**:
+- [ ] Create `claude_planner/generator/brief_extractor.py`
+- [ ] Implement `extract_basic_info()` - Extract project name, type, goal, users, timeline, team size
+- [ ] Implement `extract_requirements()` - Extract functional requirements (input, output, features)
+- [ ] Implement `extract_tech_constraints()` - Extract must use/cannot use/deployment
+- [ ] Implement `extract_quality_requirements()` - Extract performance, security, scalability
+- [ ] Implement `extract_team_info()` - Extract team composition, knowledge, resources
+- [ ] Create comprehensive unit tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Use parser.py utilities for markdown extraction
+- Return structured dictionaries for each section
+- Validate required fields are present
+
+**Files to Create**:
+- `claude_planner/generator/brief_extractor.py` - Field extraction logic
+- `tests/test_brief_extractor.py` - Extractor unit tests
+
+**Success Criteria**:
+- [ ] extract_basic_info() returns dict with project_name, project_type, goal, users, timeline, team_size
+- [ ] extract_requirements() returns dict with input, output, key_features, nice_to_have
+- [ ] extract_tech_constraints() returns dict with must_use, cannot_use, deployment_target
+- [ ] extract_quality_requirements() returns dict with performance, security, scalability
+- [ ] extract_team_info() returns dict with team_composition, existing_knowledge, infrastructure
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 2.1.3: ProjectBrief Converter (Single Session)**
+
+**Prerequisites**:
+- [x] 2.1.2: Field Extractor
+
+**Deliverables**:
+- [ ] Create `claude_planner/generator/brief_converter.py`
+- [ ] Implement `convert_to_project_brief()` - Convert extracted dicts to ProjectBrief model
+- [ ] Implement field mapping logic
+- [ ] Implement validation during conversion
+- [ ] Handle missing optional fields gracefully
+- [ ] Create comprehensive unit tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Use ProjectBrief model from models.py
+- Validate during conversion using model.validate()
+- Provide clear error messages for missing required fields
+
+**Files to Create**:
+- `claude_planner/generator/brief_converter.py` - Conversion logic
+- `tests/test_brief_converter.py` - Converter unit tests
+
+**Success Criteria**:
+- [ ] convert_to_project_brief() takes extracted dicts and returns ProjectBrief
+- [ ] Validation errors provide clear messages
+- [ ] Optional fields handled gracefully (None or defaults)
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+### Task 2.2: Parser Integration
+
+**Subtask 2.2.1: Complete Parser Pipeline (Single Session)**
+
+**Prerequisites**:
+- [x] 2.1.3: ProjectBrief Converter
+
+**Deliverables**:
+- [ ] Create `claude_planner/generator/brief_parser.py` - Main parser entry point
+- [ ] Implement `parse_project_brief()` - Complete pipeline from file to ProjectBrief
+- [ ] Integrate: file reading → markdown parsing → field extraction → conversion → validation
+- [ ] Add comprehensive error handling
+- [ ] Create integration tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Single entry point function for ease of use
+- Chain: parse_markdown_file() → extract_*() → convert_to_project_brief()
+- Wrap all errors with context about parsing stage
+
+**Files to Create**:
+- `claude_planner/generator/brief_parser.py` - Main parser pipeline
+- `tests/test_brief_parser.py` - Integration tests
+
+**Success Criteria**:
+- [ ] parse_project_brief(Path) returns validated ProjectBrief
+- [ ] Errors indicate which parsing stage failed
+- [ ] Works with real PROJECT_BRIEF.md file
+- [ ] All tests pass including integration tests
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+## Phase 3: Template System (Week 1, Days 4-5)
+
+**Goal**: Create Jinja2 template system for generating claude.md and DEVELOPMENT_PLAN.md
+
+**Timeline**: 2 days (Days 4-5 of Week 1)
+
+**Prerequisites**: Phase 2 complete (Parser)
+
+---
+
+### Task 3.1: Template Infrastructure
+
+**Subtask 3.1.1: Template Selector (Single Session)**
+
+**Prerequisites**:
+- [x] 2.2.1: Complete Parser Pipeline
+
+**Deliverables**:
+- [ ] Create `claude_planner/templates/selector.py`
+- [ ] Implement `list_templates()` - List available templates
+- [ ] Implement `select_template()` - Choose template based on project type
+- [ ] Implement `load_template_config()` - Load template metadata from YAML
+- [ ] Create template registry system
+- [ ] Create unit tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Templates stored in `claude_planner/templates/{template_name}/`
+- Each template has `config.yaml` with metadata
+- Default templates: web-app, api, cli
+
+**Files to Create**:
+- `claude_planner/templates/selector.py` - Template selection logic
+- `tests/test_selector.py` - Selector unit tests
+
+**Success Criteria**:
+- [ ] list_templates() returns list of available template names
+- [ ] select_template(project_type) returns template path
+- [ ] load_template_config() reads and validates template metadata
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 3.1.2: Jinja2 Template - claude.md (Single Session)**
+
+**Prerequisites**:
+- [x] 3.1.1: Template Selector
+
+**Deliverables**:
+- [ ] Create `claude_planner/templates/base/claude.md.j2` - Base claude.md template
+- [ ] Add template variables: project_name, tech_stack, file_structure
+- [ ] Add sections: Core Principles, File Management, Testing, Completion Protocol
+- [ ] Add template filters for formatting
+- [ ] Create rendering tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Jinja2 templating engine
+- Base template extended by project-type templates
+- Variables passed as dict
+
+**Files to Create**:
+- `claude_planner/templates/base/claude.md.j2` - Claude.md Jinja2 template
+- `tests/test_claude_template.py` - Template rendering tests
+
+**Success Criteria**:
+- [ ] Template renders with sample data
+- [ ] All required sections present
+- [ ] Variables properly substituted
+- [ ] Tests verify template output
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 3.1.3: Jinja2 Template - DEVELOPMENT_PLAN.md (Single Session)**
+
+**Prerequisites**:
+- [x] 3.1.2: Jinja2 Template - claude.md
+
+**Deliverables**:
+- [ ] Create `claude_planner/templates/base/plan.md.j2` - Base DEVELOPMENT_PLAN.md template
+- [ ] Add template variables: project_name, timeline, phases, tasks, subtasks
+- [ ] Add sections: Progress Tracking, Phase Details, Success Metrics
+- [ ] Add loops for phases/tasks/subtasks
+- [ ] Create rendering tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Use Jinja2 loops: {% for phase in phases %}
+- Use Jinja2 conditionals: {% if phase.complete %}
+- Format checkboxes: [ ] or [x]
+
+**Files to Create**:
+- `claude_planner/templates/base/plan.md.j2` - DEVELOPMENT_PLAN.md Jinja2 template
+- `tests/test_plan_template.py` - Template rendering tests
+
+**Success Criteria**:
+- [ ] Template renders with sample DevelopmentPlan
+- [ ] Progress tracking section with checkboxes
+- [ ] Phase details with all subtasks
+- [ ] Tests verify template output
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+### Task 3.2: Template Renderer
+
+**Subtask 3.2.1: Template Renderer (Single Session)**
+
+**Prerequisites**:
+- [x] 3.1.3: Jinja2 Template - DEVELOPMENT_PLAN.md
+
+**Deliverables**:
+- [ ] Create `claude_planner/generator/renderer.py`
+- [ ] Implement `render_claude_md()` - Render claude.md from template
+- [ ] Implement `render_plan_md()` - Render DEVELOPMENT_PLAN.md from template
+- [ ] Implement `render_all()` - Render all files for project
+- [ ] Add Jinja2 environment setup with custom filters
+- [ ] Create rendering tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Jinja2 Environment with FileSystemLoader
+- Custom filters for markdown formatting
+- Output to specified directory
+
+**Files to Create**:
+- `claude_planner/generator/renderer.py` - Template rendering engine
+- `tests/test_renderer.py` - Renderer unit tests
+
+**Success Criteria**:
+- [ ] render_claude_md() outputs valid claude.md
+- [ ] render_plan_md() outputs valid DEVELOPMENT_PLAN.md
+- [ ] render_all() creates complete project structure
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+### Task 3.3: Project Type Templates
+
+**Subtask 3.3.1: Web-App Template (Single Session)**
+
+**Prerequisites**:
+- [x] 3.2.1: Template Renderer
+
+**Deliverables**:
+- [ ] Create `claude_planner/templates/web-app/config.yaml` - Template metadata
+- [ ] Create `claude_planner/templates/web-app/claude.md.j2` - Web-app specific rules
+- [ ] Create `claude_planner/templates/web-app/plan.md.j2` - Web-app specific phases
+- [ ] Define web-app specific tech stack defaults
+- [ ] Define web-app specific phases (Frontend, Backend, Database, etc.)
+- [ ] Create template tests
+
+**Technology Decisions**:
+- Extends base templates
+- Default stack: React/Next.js + Python/FastAPI + PostgreSQL
+- Phases: Setup, Frontend, Backend, Database, Integration, Deployment
+
+**Files to Create**:
+- `claude_planner/templates/web-app/config.yaml`
+- `claude_planner/templates/web-app/claude.md.j2`
+- `claude_planner/templates/web-app/plan.md.j2`
+- `tests/test_web_app_template.py`
+
+**Success Criteria**:
+- [ ] Template renders complete web-app project
+- [ ] Tech stack appropriate for web apps
+- [ ] Phases cover frontend, backend, database
+- [ ] All tests pass
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 3.3.2: API Template (Single Session)**
+
+**Prerequisites**:
+- [x] 3.3.1: Web-App Template
+
+**Deliverables**:
+- [ ] Create `claude_planner/templates/api/config.yaml` - Template metadata
+- [ ] Create `claude_planner/templates/api/claude.md.j2` - API specific rules
+- [ ] Create `claude_planner/templates/api/plan.md.j2` - API specific phases
+- [ ] Define API specific tech stack defaults
+- [ ] Define API specific phases (Models, Endpoints, Auth, Docs, etc.)
+- [ ] Create template tests
+
+**Technology Decisions**:
+- Extends base templates
+- Default stack: FastAPI/Flask + PostgreSQL + Redis
+- Phases: Setup, Models, Endpoints, Auth, Validation, Docs, Deployment
+
+**Files to Create**:
+- `claude_planner/templates/api/config.yaml`
+- `claude_planner/templates/api/claude.md.j2`
+- `claude_planner/templates/api/plan.md.j2`
+- `tests/test_api_template.py`
+
+**Success Criteria**:
+- [ ] Template renders complete API project
+- [ ] Tech stack appropriate for APIs
+- [ ] Phases cover models, endpoints, auth, docs
+- [ ] All tests pass
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 3.3.3: CLI Template (Single Session)**
+
+**Prerequisites**:
+- [x] 3.3.2: API Template
+
+**Deliverables**:
+- [ ] Create `claude_planner/templates/cli/config.yaml` - Template metadata
+- [ ] Create `claude_planner/templates/cli/claude.md.j2` - CLI specific rules
+- [ ] Create `claude_planner/templates/cli/plan.md.j2` - CLI specific phases
+- [ ] Define CLI specific tech stack defaults
+- [ ] Define CLI specific phases (Commands, Args, Config, Dist, etc.)
+- [ ] Create template tests
+
+**Technology Decisions**:
+- Extends base templates
+- Default stack: Click/Typer + Python
+- Phases: Setup, Commands, Arguments, Config, Testing, Distribution
+
+**Files to Create**:
+- `claude_planner/templates/cli/config.yaml`
+- `claude_planner/templates/cli/claude.md.j2`
+- `claude_planner/templates/cli/plan.md.j2`
+- `tests/test_cli_template.py`
+
+**Success Criteria**:
+- [ ] Template renders complete CLI project
+- [ ] Tech stack appropriate for CLIs
+- [ ] Phases cover commands, args, distribution
+- [ ] All tests pass
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+## Phase 4: Plan Generator (Week 2, Days 1-2)
+
+**Goal**: Generate development plans from project requirements
+
+**Timeline**: 2 days (Days 1-2 of Week 2)
+
+**Prerequisites**: Phase 3 complete (Template System)
+
+---
+
+### Task 4.1: Generation Logic
+
+**Subtask 4.1.1: Tech Stack Generator (Single Session)**
+
+**Prerequisites**:
+- [x] 3.3.3: CLI Template
+
+**Deliverables**:
+- [ ] Create `claude_planner/generator/tech_stack_gen.py`
+- [ ] Implement `generate_tech_stack()` - Generate TechStack from requirements
+- [ ] Implement technology selection based on project type
+- [ ] Implement constraint checking (must use/cannot use)
+- [ ] Use template defaults as fallback
+- [ ] Create comprehensive tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Rule-based selection from constraints
+- Template defaults for missing choices
+- Validation against cannot_use constraints
+
+**Files to Create**:
+- `claude_planner/generator/tech_stack_gen.py` - Tech stack generation
+- `tests/test_tech_stack_gen.py` - Generator tests
+
+**Success Criteria**:
+- [ ] Respects must_use constraints
+- [ ] Avoids cannot_use constraints
+- [ ] Uses template defaults when no preference
+- [ ] Returns valid TechStack model
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 4.1.2: Phase Generator (Single Session)**
+
+**Prerequisites**:
+- [x] 4.1.1: Tech Stack Generator
+
+**Deliverables**:
+- [ ] Create `claude_planner/generator/phase_gen.py`
+- [ ] Implement `generate_phases()` - Create phases from template and requirements
+- [ ] Implement phase customization based on features
+- [ ] Implement timeline distribution across phases
+- [ ] Create phase dependency ordering
+- [ ] Create comprehensive tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Start with template phases
+- Add/remove phases based on requirements
+- Distribute timeline: Foundation (20%), Core (40%), Integration (20%), Polish (20%)
+
+**Files to Create**:
+- `claude_planner/generator/phase_gen.py` - Phase generation
+- `tests/test_phase_gen.py` - Phase generator tests
+
+**Success Criteria**:
+- [ ] Generates Phase 0 (Foundation) always
+- [ ] Customizes phases based on key features
+- [ ] Distributes timeline appropriately
+- [ ] Returns list of Phase models
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 4.1.3: Task Generator (Single Session)**
+
+**Prerequisites**:
+- [x] 4.1.2: Phase Generator
+
+**Deliverables**:
+- [ ] Create `claude_planner/generator/task_gen.py`
+- [ ] Implement `generate_tasks()` - Create tasks for each phase
+- [ ] Implement feature-to-task mapping
+- [ ] Implement task grouping logic (related functionality)
+- [ ] Create task dependency tracking
+- [ ] Create comprehensive tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Template provides base tasks per phase
+- Map features to tasks (e.g., "auth" → Authentication task)
+- Group related tasks together
+
+**Files to Create**:
+- `claude_planner/generator/task_gen.py` - Task generation
+- `tests/test_task_gen.py` - Task generator tests
+
+**Success Criteria**:
+- [ ] Each phase has 2-5 tasks
+- [ ] Tasks logically grouped
+- [ ] Features mapped to appropriate tasks
+- [ ] Returns list of Task models per phase
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 4.1.4: Subtask Generator (Single Session)**
+
+**Prerequisites**:
+- [x] 4.1.3: Task Generator
+
+**Deliverables**:
+- [ ] Create `claude_planner/generator/subtask_gen.py`
+- [ ] Implement `generate_subtasks()` - Break tasks into subtasks
+- [ ] Implement subtask sizing (single session = 2-4 hours work)
+- [ ] Implement prerequisite detection
+- [ ] Ensure 3-7 deliverables per subtask
+- [ ] Create comprehensive tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Heuristic: 1 task = 2-5 subtasks
+- Each subtask: 3-7 deliverables, marked "(Single Session)"
+- Auto-detect prerequisites from deliverables
+
+**Files to Create**:
+- `claude_planner/generator/subtask_gen.py` - Subtask generation
+- `tests/test_subtask_gen.py` - Subtask generator tests
+
+**Success Criteria**:
+- [ ] Each task has 2-5 subtasks
+- [ ] Each subtask has 3-7 deliverables
+- [ ] All subtasks marked "(Single Session)"
+- [ ] Prerequisites auto-detected
+- [ ] Returns list of Subtask models per task
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+### Task 4.2: Integration
+
+**Subtask 4.2.1: Complete Plan Generator (Single Session)**
+
+**Prerequisites**:
+- [x] 4.1.4: Subtask Generator
+
+**Deliverables**:
+- [ ] Create `claude_planner/generator/plan_generator.py` - Main generator pipeline
+- [ ] Implement `generate_plan()` - Complete generation pipeline
+- [ ] Integrate: tech stack → phases → tasks → subtasks → DevelopmentPlan
+- [ ] Add validation of generated plan
+- [ ] Create integration tests with full PROJECT_BRIEF.md
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Single entry point: generate_plan(ProjectBrief, template) → DevelopmentPlan
+- Chain all generators in sequence
+- Validate final plan before returning
+
+**Files to Create**:
+- `claude_planner/generator/plan_generator.py` - Complete plan generation
+- `tests/test_plan_generator.py` - Integration tests
+
+**Success Criteria**:
+- [ ] generate_plan() returns complete, valid DevelopmentPlan
+- [ ] All prerequisites satisfied
+- [ ] No circular dependencies
+- [ ] Integration test with real PROJECT_BRIEF.md passes
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+## Phase 5: CLI Commands (Week 2, Days 2-3)
+
+**Goal**: Implement Click-based CLI with generate, validate, list-templates commands
+
+**Timeline**: 1 day (Days 2-3 of Week 2)
+
+**Prerequisites**: Phase 4 complete (Plan Generator)
+
+---
+
+### Task 5.1: CLI Implementation
+
+**Subtask 5.1.1: CLI Entry Point (Single Session)**
+
+**Prerequisites**:
+- [x] 4.2.1: Complete Plan Generator
+
+**Deliverables**:
+- [ ] Create `claude_planner/cli.py` - Main CLI module
+- [ ] Implement Click group for commands
+- [ ] Add `--version` flag
+- [ ] Add `--verbose` global flag
+- [ ] Add `--help` documentation
+- [ ] Setup console script in pyproject.toml
+- [ ] Create basic CLI tests
+
+**Technology Decisions**:
+- Click 8.1+ framework
+- Console script: `claude-planner`
+- Global options: --version, --verbose, --help
+
+**Files to Create**:
+- `claude_planner/cli.py` - CLI entry point
+- `tests/test_cli.py` - CLI tests
+
+**Files to Modify**:
+- `pyproject.toml` - Add console_scripts entry point
+
+**Success Criteria**:
+- [ ] `claude-planner --help` works
+- [ ] `claude-planner --version` shows version
+- [ ] --verbose enables debug output
+- [ ] All tests pass
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 5.1.2: Generate Command (Single Session)**
+
+**Prerequisites**:
+- [x] 5.1.1: CLI Entry Point
+
+**Deliverables**:
+- [ ] Implement `generate` command in cli.py
+- [ ] Add arguments: project_name
+- [ ] Add options: --brief (required), --template (optional), --output-dir (optional)
+- [ ] Integrate parser and generator
+- [ ] Integrate renderer to write files
+- [ ] Add progress indicators (Click.progressbar or spinner)
+- [ ] Create command tests
+
+**Technology Decisions**:
+- Command: `claude-planner generate <name> --brief <file> --template <type>`
+- Default output: `./<project_name>/`
+- Default template: auto-detect from project_type in brief
+
+**Files to Create**:
+- `tests/test_generate_command.py` - Generate command tests
+
+**Files to Modify**:
+- `claude_planner/cli.py` - Add generate command
+
+**Success Criteria**:
+- [ ] `claude-planner generate my-api --brief brief.md` creates project
+- [ ] Outputs: claude.md, DEVELOPMENT_PLAN.md, README.md
+- [ ] Progress shown during generation
+- [ ] Clear error messages for failures
+- [ ] All tests pass
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 5.1.3: Validate Command (Single Session)**
+
+**Prerequisites**:
+- [x] 5.1.2: Generate Command
+
+**Deliverables**:
+- [ ] Implement `validate` command in cli.py
+- [ ] Add arguments: plan_file (DEVELOPMENT_PLAN.md)
+- [ ] Run validation checks on plan
+- [ ] Display validation report (errors, warnings)
+- [ ] Exit code: 0 if valid, 1 if errors
+- [ ] Create command tests
+
+**Technology Decisions**:
+- Command: `claude-planner validate <DEVELOPMENT_PLAN.md>`
+- Use DevelopmentPlan.validate() from models
+- Color output: red for errors, yellow for warnings, green for success
+
+**Files to Create**:
+- `tests/test_validate_command.py` - Validate command tests
+
+**Files to Modify**:
+- `claude_planner/cli.py` - Add validate command
+
+**Success Criteria**:
+- [ ] `claude-planner validate plan.md` shows validation results
+- [ ] Errors displayed in red, warnings in yellow
+- [ ] Exit code 0 for valid, 1 for errors
+- [ ] All tests pass
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 5.1.4: List Templates Command (Single Session)**
+
+**Prerequisites**:
+- [x] 5.1.3: Validate Command
+
+**Deliverables**:
+- [ ] Implement `list-templates` command in cli.py
+- [ ] Display available templates with descriptions
+- [ ] Show template metadata (name, description, tech stack)
+- [ ] Format as table or list
+- [ ] Create command tests
+
+**Technology Decisions**:
+- Command: `claude-planner list-templates`
+- Use selector.list_templates() from templates
+- Display: name, description, default tech stack
+
+**Files to Create**:
+- `tests/test_list_templates_command.py` - List templates command tests
+
+**Files to Modify**:
+- `claude_planner/cli.py` - Add list-templates command
+
+**Success Criteria**:
+- [ ] `claude-planner list-templates` shows all templates
+- [ ] Each template shows name and description
+- [ ] Clear, readable format
+- [ ] All tests pass
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+### Task 5.2: CLI Testing
+
+**Subtask 5.2.1: CLI Integration Tests (Single Session)**
+
+**Prerequisites**:
+- [x] 5.1.4: List Templates Command
+
+**Deliverables**:
+- [ ] Create end-to-end CLI tests
+- [ ] Test full generate workflow with real brief
+- [ ] Test validate workflow with generated plan
+- [ ] Test error handling (missing files, invalid brief)
+- [ ] Test all command combinations
+- [ ] Achieve >80% test coverage on CLI module
+
+**Technology Decisions**:
+- Use Click.testing.CliRunner for testing
+- Use tmp_path fixtures for file operations
+- Test both success and failure paths
+
+**Files to Create**:
+- `tests/test_cli_integration.py` - End-to-end CLI tests
+
+**Success Criteria**:
+- [ ] Full workflow tested: brief → generate → validate
+- [ ] Error cases tested (missing files, invalid input)
+- [ ] All commands tested with various options
+- [ ] All tests pass
+- [ ] >80% coverage on cli.py
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+## Phase 6: Validation Engine (Week 2, Days 3-4)
+
+**Goal**: Implement comprehensive validation for generated plans
+
+**Timeline**: 1 day (Days 3-4 of Week 2)
+
+**Prerequisites**: Phase 5 complete (CLI Commands)
+
+---
+
+### Task 6.1: Validation Rules
+
+**Subtask 6.1.1: Validation Rules Engine (Single Session)**
+
+**Prerequisites**:
+- [x] 5.2.1: CLI Integration Tests
+
+**Deliverables**:
+- [ ] Create `claude_planner/validator/rules.py`
+- [ ] Implement ValidationRule base class
+- [ ] Implement specific rules: SubtaskSizeRule, PrerequisiteRule, IDFormatRule, etc.
+- [ ] Each rule returns: severity (error/warning), message, location
+- [ ] Create rule registry
+- [ ] Create comprehensive tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Rule pattern: validate(plan) → list of ValidationResult
+- Severity levels: ERROR (blocking), WARNING (non-blocking)
+- Rules configurable via YAML
+
+**Files to Create**:
+- `claude_planner/validator/rules.py` - Validation rules
+- `tests/test_validation_rules.py` - Rules tests
+
+**Success Criteria**:
+- [ ] ValidationRule base class with validate() method
+- [ ] 5+ specific rules implemented
+- [ ] Rules return severity, message, location
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 6.1.2: Subtask Validator (Single Session)**
+
+**Prerequisites**:
+- [x] 6.1.1: Validation Rules Engine
+
+**Deliverables**:
+- [ ] Create `claude_planner/validator/subtask_validator.py`
+- [ ] Implement `validate_subtask()` - Check single subtask
+- [ ] Check: 3-7 deliverables
+- [ ] Check: "(Single Session)" suffix
+- [ ] Check: ID format (X.Y.Z)
+- [ ] Check: Prerequisites exist
+- [ ] Create comprehensive tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Use validation rules from rules.py
+- Return list of ValidationResult
+- Check against subtask model
+
+**Files to Create**:
+- `claude_planner/validator/subtask_validator.py` - Subtask validation
+- `tests/test_subtask_validator.py` - Subtask validator tests
+
+**Success Criteria**:
+- [ ] Validates deliverable count (3-7)
+- [ ] Validates "(Single Session)" suffix
+- [ ] Validates ID format
+- [ ] Validates prerequisites exist
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 6.1.3: Plan Validator (Single Session)**
+
+**Prerequisites**:
+- [x] 6.1.2: Subtask Validator
+
+**Deliverables**:
+- [ ] Create `claude_planner/validator/plan_validator.py`
+- [ ] Implement `validate_plan()` - Check entire plan
+- [ ] Check: All phases have tasks
+- [ ] Check: All tasks have subtasks
+- [ ] Check: No circular dependencies
+- [ ] Check: Timeline is realistic
+- [ ] Create comprehensive tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Aggregate subtask validation results
+- Check plan-level constraints
+- Use DFS for circular dependency check
+
+**Files to Create**:
+- `claude_planner/validator/plan_validator.py` - Plan validation
+- `tests/test_plan_validator.py` - Plan validator tests
+
+**Success Criteria**:
+- [ ] Validates all phases non-empty
+- [ ] Validates all tasks non-empty
+- [ ] Detects circular dependencies
+- [ ] Checks timeline realistic (not 0 days, not 1000 days)
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 6.1.4: Validation Reporter (Single Session)**
+
+**Prerequisites**:
+- [x] 6.1.3: Plan Validator
+
+**Deliverables**:
+- [ ] Create `claude_planner/validator/reporter.py`
+- [ ] Implement `format_report()` - Format validation results
+- [ ] Implement console output with colors
+- [ ] Implement summary statistics (X errors, Y warnings)
+- [ ] Group results by severity and location
+- [ ] Create comprehensive tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Use Click.style() for colored output
+- Format: [ERROR] Location: Message
+- Summary at end: "3 errors, 5 warnings"
+
+**Files to Create**:
+- `claude_planner/validator/reporter.py` - Validation reporting
+- `tests/test_reporter.py` - Reporter tests
+
+**Success Criteria**:
+- [ ] Formats results with colors (red=error, yellow=warning)
+- [ ] Groups by severity and location
+- [ ] Shows summary statistics
+- [ ] Clear, readable output
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+### Task 6.2: Validator Integration
+
+**Subtask 6.2.1: Complete Validator Pipeline (Single Session)**
+
+**Prerequisites**:
+- [x] 6.1.4: Validation Reporter
+
+**Deliverables**:
+- [ ] Create `claude_planner/validator/validator.py` - Main validator
+- [ ] Implement `validate()` - Complete validation pipeline
+- [ ] Integrate all validators and reporter
+- [ ] Add configurable rules (enable/disable specific rules)
+- [ ] Create integration tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Single entry point: validate(DevelopmentPlan) → ValidationReport
+- Chain: subtask validation → plan validation → report
+- Config file support for rule customization
+
+**Files to Create**:
+- `claude_planner/validator/validator.py` - Main validator
+- `tests/test_validator_integration.py` - Integration tests
+
+**Success Criteria**:
+- [ ] validate() returns complete ValidationReport
+- [ ] All rules executed
+- [ ] Report formatted and ready for display
+- [ ] Rules configurable via settings
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+## Phase 7: Git Integration (Week 2, Day 4)
+
+**Goal**: Optional git repository initialization and initial commit
+
+**Timeline**: 0.5 days (Day 4 of Week 2)
+
+**Prerequisites**: Phase 6 complete (Validation Engine)
+
+---
+
+### Task 7.1: Git Operations
+
+**Subtask 7.1.1: Git Init Utility (Single Session)**
+
+**Prerequisites**:
+- [x] 6.2.1: Complete Validator Pipeline
+
+**Deliverables**:
+- [ ] Create `claude_planner/utils/git.py`
+- [ ] Implement `init_repository()` - Initialize git repo
+- [ ] Implement `check_git_available()` - Verify git installed
+- [ ] Handle errors gracefully (git not found, already initialized)
+- [ ] Create comprehensive tests (mock subprocess)
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Use subprocess.run() for git commands
+- Check git availability before operations
+- Provide clear error messages
+
+**Files to Create**:
+- `claude_planner/utils/git.py` - Git utilities
+- `tests/test_git.py` - Git utility tests
+
+**Success Criteria**:
+- [ ] init_repository(Path) initializes git repo
+- [ ] check_git_available() returns True if git found
+- [ ] Errors handled gracefully
+- [ ] All tests pass (with subprocess mocking)
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 7.1.2: Initial Commit Creator (Single Session)**
+
+**Prerequisites**:
+- [x] 7.1.1: Git Init Utility
+
+**Deliverables**:
+- [ ] Implement `create_initial_commit()` in git.py
+- [ ] Add all generated files (claude.md, DEVELOPMENT_PLAN.md, etc.)
+- [ ] Create semantic initial commit message
+- [ ] Handle git user config (name/email)
+- [ ] Create comprehensive tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Commit message: "chore: initialize project with generated plan"
+- Use git config user.name/email if set, else prompt
+- Add all files in project directory
+
+**Files to Modify**:
+- `claude_planner/utils/git.py` - Add create_initial_commit()
+- `tests/test_git.py` - Add initial commit tests
+
+**Success Criteria**:
+- [ ] create_initial_commit() creates initial commit
+- [ ] All generated files included
+- [ ] Semantic commit message
+- [ ] Handles missing user config
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 7.1.3: Git Integration in CLI (Single Session)**
+
+**Prerequisites**:
+- [x] 7.1.2: Initial Commit Creator
+
+**Deliverables**:
+- [ ] Add `--init-git` flag to generate command
+- [ ] Integrate git init and commit after file generation
+- [ ] Display git status in output
+- [ ] Handle errors (git not available, already initialized)
+- [ ] Create integration tests
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Flag: `--init-git` (optional, default: False)
+- Show: "✅ Git repository initialized" or skip message
+- Graceful fallback if git unavailable
+
+**Files to Modify**:
+- `claude_planner/cli.py` - Add --init-git to generate command
+- `tests/test_generate_command.py` - Add git integration tests
+
+**Success Criteria**:
+- [ ] `claude-planner generate app --brief brief.md --init-git` initializes repo
+- [ ] Git operations shown in output
+- [ ] Errors handled gracefully
+- [ ] All tests pass
+- [ ] >80% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+## Phase 8: Testing & Documentation (Week 2, Day 5)
+
+**Goal**: Comprehensive testing and documentation
+
+**Timeline**: 1 day (Day 5 of Week 2)
+
+**Prerequisites**: Phase 7 complete (Git Integration)
+
+---
+
+### Task 8.1: Testing
+
+**Subtask 8.1.1: Integration Tests (Single Session)**
+
+**Prerequisites**:
+- [x] 7.1.3: Git Integration in CLI
+
+**Deliverables**:
+- [ ] Create `tests/test_integration.py`
+- [ ] Test complete workflow: PROJECT_BRIEF.md → generated files
+- [ ] Test with all 3 templates (web-app, api, cli)
+- [ ] Test with various brief configurations
+- [ ] Verify output files are valid
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Use real PROJECT_BRIEF.md files from fixtures
+- Use tmp_path for output
+- Validate generated markdown structure
+
+**Files to Create**:
+- `tests/test_integration.py` - Full integration tests
+- `tests/fixtures/` - Sample PROJECT_BRIEF.md files
+
+**Success Criteria**:
+- [ ] Tests full pipeline with real briefs
+- [ ] All 3 templates tested
+- [ ] Generated files validated
+- [ ] All tests pass
+- [ ] >80% coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 8.1.2: End-to-End Tests (Single Session)**
+
+**Prerequisites**:
+- [x] 8.1.1: Integration Tests
+
+**Deliverables**:
+- [ ] Create `tests/test_e2e.py`
+- [ ] Test CLI commands end-to-end
+- [ ] Test error scenarios (missing files, invalid input)
+- [ ] Test --init-git integration
+- [ ] Test --verbose output
+- [ ] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Use subprocess to run actual CLI
+- Test as if user running commands
+- Verify exit codes and output
+
+**Files to Create**:
+- `tests/test_e2e.py` - End-to-end tests
+
+**Success Criteria**:
+- [ ] CLI tested as subprocess
+- [ ] Error scenarios covered
+- [ ] All flags tested
+- [ ] All tests pass
+- [ ] >80% coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 8.1.3: Coverage Report (Single Session)**
+
+**Prerequisites**:
+- [x] 8.1.2: End-to-End Tests
+
+**Deliverables**:
+- [ ] Run full test suite with coverage
+- [ ] Generate HTML coverage report
+- [ ] Identify gaps (<80% coverage)
+- [ ] Add tests to reach >80% coverage
+- [ ] Document coverage results
+
+**Technology Decisions**:
+- pytest-cov with --cov-report=html
+- Target: >80% overall coverage
+- Focus on critical paths first
+
+**Files to Create**:
+- `.coveragerc` - Coverage configuration
+
+**Success Criteria**:
+- [ ] All tests pass
+- [ ] Overall coverage >80%
+- [ ] Coverage report generated
+- [ ] Gaps documented or filled
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+### Task 8.2: Documentation
+
+**Subtask 8.2.1: README Documentation (Single Session)**
+
+**Prerequisites**:
+- [x] 8.1.3: Coverage Report
+
+**Deliverables**:
+- [ ] Update README.md with complete documentation
+- [ ] Add: Installation, Quick Start, Commands, Examples
+- [ ] Add badges (tests, coverage, PyPI)
+- [ ] Add screenshots/examples of output
+- [ ] Add troubleshooting section
+
+**Technology Decisions**:
+- GitHub-flavored markdown
+- Code examples for all commands
+- Link to detailed docs
+
+**Files to Modify**:
+- `README.md` - Complete documentation
+
+**Success Criteria**:
+- [ ] Installation instructions clear
+- [ ] All commands documented with examples
+- [ ] Quick start guide works
+- [ ] Troubleshooting section helpful
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 8.2.2: Usage Guide (Single Session)**
+
+**Prerequisites**:
+- [x] 8.2.1: README Documentation
+
+**Deliverables**:
+- [ ] Create `docs/usage.md` - Detailed usage guide
+- [ ] Document all CLI commands and options
+- [ ] Document PROJECT_BRIEF.md format
+- [ ] Add examples for each use case
+- [ ] Add FAQ section
+
+**Technology Decisions**:
+- Markdown documentation
+- Focus on common use cases
+- Link from README
+
+**Files to Create**:
+- `docs/usage.md` - Usage guide
+- `docs/brief-format.md` - PROJECT_BRIEF.md format reference
+
+**Success Criteria**:
+- [ ] All commands documented in detail
+- [ ] PROJECT_BRIEF.md format clear
+- [ ] Use cases with examples
+- [ ] FAQ answers common questions
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 8.2.3: Template Creation Guide (Single Session)**
+
+**Prerequisites**:
+- [x] 8.2.2: Usage Guide
+
+**Deliverables**:
+- [ ] Create `docs/template-guide.md` - Template creation guide
+- [ ] Document template structure
+- [ ] Document config.yaml format
+- [ ] Document Jinja2 template variables
+- [ ] Add example custom template
+
+**Technology Decisions**:
+- Step-by-step guide for creating templates
+- Reference existing templates as examples
+- Document all available template variables
+
+**Files to Create**:
+- `docs/template-guide.md` - Template creation guide
+- `examples/custom-template/` - Example custom template
+
+**Success Criteria**:
+- [ ] Template structure documented
+- [ ] config.yaml format clear
+- [ ] All template variables listed
+- [ ] Example custom template works
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+## Phase 9: Packaging & Distribution (Week 2, Day 5)
+
+**Goal**: Package for PyPI and distribute
+
+**Timeline**: 0.5 days (Day 5 of Week 2)
+
+**Prerequisites**: Phase 8 complete (Testing & Documentation)
+
+---
+
+### Task 9.1: Distribution
+
+**Subtask 9.1.1: Package Configuration (Single Session)**
+
+**Prerequisites**:
+- [x] 8.2.3: Template Creation Guide
+
+**Deliverables**:
+- [ ] Update `pyproject.toml` with complete metadata
+- [ ] Add: description, keywords, classifiers, urls
+- [ ] Add entry points for console script
+- [ ] Add package data (templates)
+- [ ] Create MANIFEST.in for non-Python files
+
+**Technology Decisions**:
+- Use pyproject.toml (PEP 621)
+- Include templates in package_data
+- Console script: claude-planner
+
+**Files to Modify**:
+- `pyproject.toml` - Complete package metadata
+
+**Files to Create**:
+- `MANIFEST.in` - Package data specification
+
+**Success Criteria**:
+- [ ] All metadata complete
+- [ ] Console script configured
+- [ ] Templates included in package
+- [ ] MANIFEST.in includes all needed files
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 9.1.2: PyPI Package Build (Single Session)**
+
+**Prerequisites**:
+- [x] 9.1.1: Package Configuration
+
+**Deliverables**:
+- [ ] Build wheel and sdist: `python -m build`
+- [ ] Verify package contents
+- [ ] Test installation from built package
+- [ ] Check package metadata with `twine check`
+- [ ] Fix any build warnings/errors
+
+**Technology Decisions**:
+- Use `build` package for building
+- Use `twine` for checking and uploading
+- Build both wheel (.whl) and source distribution (.tar.gz)
+
+**Files to Create**:
+- `dist/` - Built packages (gitignored)
+
+**Success Criteria**:
+- [ ] `python -m build` succeeds
+- [ ] Both wheel and sdist created
+- [ ] `twine check dist/*` passes
+- [ ] No build warnings
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 9.1.3: Installation Test (Single Session)**
+
+**Prerequisites**:
+- [x] 9.1.2: PyPI Package Build
+
+**Deliverables**:
+- [ ] Create clean virtual environment
+- [ ] Install from built wheel
+- [ ] Test all CLI commands work
+- [ ] Verify templates included
+- [ ] Test with real PROJECT_BRIEF.md
+
+**Technology Decisions**:
+- Test in isolated venv
+- Install: `pip install dist/*.whl`
+- Run all commands to verify
+
+**Files to Create**:
+- `tests/test_install.sh` - Installation test script
+
+**Success Criteria**:
+- [ ] Package installs cleanly
+- [ ] `claude-planner --help` works
+- [ ] All commands functional
+- [ ] Templates accessible
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 9.1.4: PyPI Upload (Single Session)**
+
+**Prerequisites**:
+- [x] 9.1.3: Installation Test
+
+**Deliverables**:
+- [ ] Create PyPI account (if needed)
+- [ ] Configure ~/.pypirc with token
+- [ ] Upload to TestPyPI first: `twine upload --repository testpypi dist/*`
+- [ ] Test install from TestPyPI
+- [ ] Upload to PyPI: `twine upload dist/*`
+- [ ] Verify package on PyPI
+
+**Technology Decisions**:
+- Use API tokens (not password)
+- Test on TestPyPI first
+- Upload both wheel and sdist
+
+**Success Criteria**:
+- [ ] Package on TestPyPI works
+- [ ] Package on PyPI published
+- [ ] `pip install claude-code-planner` works
+- [ ] PyPI page looks correct
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+## Phase 10: Dogfooding (Ongoing)
+
+**Goal**: Use the tool to generate plans for real projects
+
+**Timeline**: Ongoing
+
+**Prerequisites**: Phase 9 complete (Distribution)
+
+---
+
+### Task 10.1: Self-Hosting
+
+**Subtask 10.1.1: Generate Example Plans (Single Session)**
+
+**Prerequisites**:
+- [x] 9.1.4: PyPI Upload
+
+**Deliverables**:
+- [ ] Create 5 sample PROJECT_BRIEF.md files
+- [ ] Run claude-planner generate for each
+- [ ] Verify generated plans are valid
+- [ ] Save examples to `examples/` directory
+- [ ] Document any issues found
+
+**Technology Decisions**:
+- Projects: web-app, api, cli, mobile-app, data-pipeline
+- Use all 3 templates
+- Test various configurations
+
+**Files to Create**:
+- `examples/web-app-brief.md`
+- `examples/api-brief.md`
+- `examples/cli-brief.md`
+- `examples/mobile-app-brief.md`
+- `examples/data-pipeline-brief.md`
+- `examples/*/claude.md` (generated)
+- `examples/*/DEVELOPMENT_PLAN.md` (generated)
+
+**Success Criteria**:
+- [ ] 5 PROJECT_BRIEF.md files created
+- [ ] All generate successfully
+- [ ] Generated plans valid
+- [ ] Examples saved for reference
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
+
+**Subtask 10.1.2: Iterate Based on Feedback (Single Session)**
+
+**Prerequisites**:
+- [x] 10.1.1: Generate Example Plans
+
+**Deliverables**:
+- [ ] Review generated plans for quality
+- [ ] Document improvements needed
+- [ ] Prioritize fixes/enhancements
+- [ ] Create issues for v2 features
+- [ ] Update roadmap
+
+**Technology Decisions**:
+- Track issues in GitHub
+- Categorize: bugs, enhancements, v2 features
+- Prioritize based on impact
+
+**Files to Create**:
+- `ROADMAP.md` - Future enhancements
+- `CHANGELOG.md` - Version history
+
+**Success Criteria**:
+- [ ] All issues documented
+- [ ] Roadmap created
+- [ ] Priorities clear
+- [ ] v2 features identified
+
+---
+
+**Completion Notes**:
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+
+---
 
 ---
 
