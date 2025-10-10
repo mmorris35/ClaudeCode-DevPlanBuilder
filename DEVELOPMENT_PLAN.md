@@ -63,7 +63,7 @@ please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for cont
 
 ### Phase 2: PROJECT_BRIEF Parser (Week 1, Days 3-4)
 - [x] 2.1.1: Markdown Parser
-- [ ] 2.1.2: Field Extractor
+- [x] 2.1.2: Field Extractor
 - [ ] 2.1.3: Validator Integration
 - [ ] 2.2.1: Parser Tests
 
@@ -752,14 +752,14 @@ dev = [
 - [x] 2.1.1: Markdown Parser
 
 **Deliverables**:
-- [ ] Create `claude_planner/generator/brief_extractor.py`
-- [ ] Implement `extract_basic_info()` - Extract project name, type, goal, users, timeline, team size
-- [ ] Implement `extract_requirements()` - Extract functional requirements (input, output, features)
-- [ ] Implement `extract_tech_constraints()` - Extract must use/cannot use/deployment
-- [ ] Implement `extract_quality_requirements()` - Extract performance, security, scalability
-- [ ] Implement `extract_team_info()` - Extract team composition, knowledge, resources
-- [ ] Create comprehensive unit tests
-- [ ] Achieve >80% test coverage
+- [x] Create `claude_planner/generator/brief_extractor.py`
+- [x] Implement `extract_basic_info()` - Extract project name, type, goal, users, timeline, team size
+- [x] Implement `extract_requirements()` - Extract functional requirements (input, output, features)
+- [x] Implement `extract_tech_constraints()` - Extract must use/cannot use/deployment
+- [x] Implement `extract_quality_requirements()` - Extract performance, security, scalability
+- [x] Implement `extract_team_info()` - Extract team composition, knowledge, resources
+- [x] Create comprehensive unit tests
+- [x] Achieve >80% test coverage
 
 **Technology Decisions**:
 - Use parser.py utilities for markdown extraction
@@ -771,24 +771,44 @@ dev = [
 - `tests/test_brief_extractor.py` - Extractor unit tests
 
 **Success Criteria**:
-- [ ] extract_basic_info() returns dict with project_name, project_type, goal, users, timeline, team_size
-- [ ] extract_requirements() returns dict with input, output, key_features, nice_to_have
-- [ ] extract_tech_constraints() returns dict with must_use, cannot_use, deployment_target
-- [ ] extract_quality_requirements() returns dict with performance, security, scalability
-- [ ] extract_team_info() returns dict with team_composition, existing_knowledge, infrastructure
-- [ ] All tests pass
-- [ ] >80% test coverage
+- [x] extract_basic_info() returns dict with project_name, project_type, goal, users, timeline, team_size
+- [x] extract_requirements() returns dict with input, output, key_features, nice_to_have
+- [x] extract_tech_constraints() returns dict with must_use, cannot_use, deployment_target
+- [x] extract_quality_requirements() returns dict with performance, security, scalability
+- [x] extract_team_info() returns dict with team_composition, existing_knowledge, infrastructure
+- [x] All tests pass
+- [x] >80% test coverage
 
 ---
 
 **Completion Notes**:
-- **Implementation**:
+- **Implementation**: Created field extraction module to parse PROJECT_BRIEF.md sections into structured dictionaries
 - **Files Created**:
-- **Files Modified**:
-- **Tests**:
-- **Build**:
-- **Branch**:
-- **Notes**:
+  - `claude_planner/generator/brief_extractor.py` (74 statements, 5 extraction functions)
+  - `tests/test_brief_extractor.py` (22 comprehensive unit tests, 373 lines)
+- **Files Modified**: None
+- **Tests**: 22 unit tests (100% coverage)
+  - extract_basic_info: 4 tests (all fields, single type, missing fields, empty)
+  - extract_requirements: 4 tests (all requirements, missing sections, empty, mixed formats)
+  - extract_tech_constraints: 3 tests (all constraints, missing sections, empty)
+  - extract_quality_requirements: 7 tests (performance, security, scalability, all sections, missing, empty, ignores non-bold lines)
+  - extract_team_info: 4 tests (all info, missing sections, empty, only checked items)
+- **Build**: ✅ Success
+  - All tests pass (22/22)
+  - Coverage: 100% (74/74 statements)
+  - Ruff linting: Clean
+  - Mypy type checking: Success
+- **Branch**: main
+- **Notes**: Field extractor complete with 5 specialized extraction functions:
+  - extract_basic_info(): Handles project name, type (with inline checkboxes), goal, users, timeline, team size
+  - extract_requirements(): Extracts input/output lists, key features, nice-to-have features
+  - extract_tech_constraints(): Extracts must use, cannot use, deployment target lists
+  - extract_quality_requirements(): Parses performance, security, scalability key-value pairs
+  - extract_team_info(): Extracts team composition checkboxes, existing knowledge, infrastructure lists
+  - Special handling for project type field with inline checkboxes ([x] CLI Tool + [x] Library)
+  - Uses parser.py utilities (extract_field_value, extract_list_items, extract_checkbox_fields)
+  - Returns structured dicts ready for ProjectBrief model population
+  Ready for brief converter integration in 2.1.3
 
 ---
 
