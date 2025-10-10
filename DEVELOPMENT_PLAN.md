@@ -64,8 +64,8 @@ please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for cont
 ### Phase 2: PROJECT_BRIEF Parser (Week 1, Days 3-4)
 - [x] 2.1.1: Markdown Parser
 - [x] 2.1.2: Field Extractor
-- [ ] 2.1.3: Validator Integration
-- [ ] 2.2.1: Parser Tests
+- [x] 2.1.3: ProjectBrief Converter
+- [ ] 2.2.1: Complete Parser Pipeline
 
 ### Phase 3: Template System (Week 1, Days 4-5)
 - [ ] 3.1.1: Template Selector
@@ -818,13 +818,13 @@ dev = [
 - [x] 2.1.2: Field Extractor
 
 **Deliverables**:
-- [ ] Create `claude_planner/generator/brief_converter.py`
-- [ ] Implement `convert_to_project_brief()` - Convert extracted dicts to ProjectBrief model
-- [ ] Implement field mapping logic
-- [ ] Implement validation during conversion
-- [ ] Handle missing optional fields gracefully
-- [ ] Create comprehensive unit tests
-- [ ] Achieve >80% test coverage
+- [x] Create `claude_planner/generator/brief_converter.py`
+- [x] Implement `convert_to_project_brief()` - Convert extracted dicts to ProjectBrief model
+- [x] Implement field mapping logic
+- [x] Implement validation during conversion
+- [x] Handle missing optional fields gracefully
+- [x] Create comprehensive unit tests
+- [x] Achieve >80% test coverage
 
 **Technology Decisions**:
 - Use ProjectBrief model from models.py
@@ -836,22 +836,49 @@ dev = [
 - `tests/test_brief_converter.py` - Converter unit tests
 
 **Success Criteria**:
-- [ ] convert_to_project_brief() takes extracted dicts and returns ProjectBrief
-- [ ] Validation errors provide clear messages
-- [ ] Optional fields handled gracefully (None or defaults)
-- [ ] All tests pass
-- [ ] >80% test coverage
+- [x] convert_to_project_brief() takes extracted dicts and returns ProjectBrief
+- [x] Validation errors provide clear messages
+- [x] Optional fields handled gracefully (None or defaults)
+- [x] All tests pass
+- [x] >80% test coverage
 
 ---
 
 **Completion Notes**:
-- **Implementation**:
+- **Implementation**: Created converter module to map extracted field dictionaries to ProjectBrief model instances
 - **Files Created**:
-- **Files Modified**:
-- **Tests**:
-- **Build**:
-- **Branch**:
-- **Notes**:
+  - `claude_planner/generator/brief_converter.py` (51 statements, 2 functions)
+  - `tests/test_brief_converter.py` (11 comprehensive unit tests, 425 lines)
+- **Files Modified**: None
+- **Tests**: 11 unit tests (86.27% coverage)
+  - test_convert_with_all_required_fields: Full conversion with all fields
+  - test_convert_with_multiple_project_types: Multiple project types joined
+  - test_convert_with_minimal_fields: Only required fields, defaults applied
+  - test_convert_missing_project_name: Validation error for missing required field
+  - test_convert_missing_project_type: Validation error for empty project type
+  - test_convert_missing_primary_goal: Validation error for missing goal
+  - test_convert_missing_target_users: Validation error for missing users
+  - test_convert_missing_timeline: Validation error for missing timeline
+  - test_convert_multiple_deployment_targets: Multiple targets joined
+  - test_convert_team_composition_multiple_roles: Multiple roles with Yes/No
+  - test_convert_handles_invalid_team_info_types: Graceful handling of type mismatches
+- **Build**: ✅ Success
+  - All tests pass (11/11)
+  - Coverage: 86.27% (51/51 statements, 7 lines not covered)
+  - Ruff linting: Clean
+  - Mypy type checking: Success
+- **Branch**: main
+- **Notes**: ProjectBrief converter complete with field mapping and validation:
+  - convert_to_project_brief(): Main conversion function taking 5 dict parameters
+  - Field mapping: project_type list → string, deployment_target list → string, team_composition dict → string
+  - Required field validation: project_name, project_type, primary_goal, target_users, timeline
+  - Default handling: team_size defaults to "1" if empty/missing
+  - Graceful handling: Optional fields default to None or empty lists/dicts
+  - Type safety: Invalid types converted to empty lists for safety
+  - Error messages: Clear indication of which required field is missing
+  - Model validation: Calls ProjectBrief.validate() after conversion
+  - Helper function _get_string_field() for consistent field extraction
+  Ready for parser pipeline integration in subtask 2.2.1
 
 ---
 
