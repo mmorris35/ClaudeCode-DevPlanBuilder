@@ -59,7 +59,7 @@ please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for cont
 - [x] 1.1.1: ProjectBrief Dataclass
 - [x] 1.1.2: Phase/Task/Subtask Models
 - [x] 1.1.3: TechStack Model
-- [ ] 1.2.1: Model Validation
+- [x] 1.2.1: Model Validation
 
 ### Phase 2: PROJECT_BRIEF Parser (Week 1, Days 3-4)
 - [ ] 2.1.1: Markdown Parser
@@ -591,6 +591,80 @@ dev = [
   - Only non-empty fields included in dict output
   - Validation ensures language is provided
   Ready for use in plan generation and template rendering
+
+---
+
+### Task 1.2: Cross-Model Validation
+
+**Subtask 1.2.1: Model Validation (Single Session)**
+
+**Prerequisites**:
+- [x] 1.1.3: TechStack Model
+
+**Deliverables**:
+- [x] Create DevelopmentPlan dataclass
+- [x] Implement cross-model validation
+- [x] Add prerequisite validation
+- [x] Add circular dependency detection
+- [x] Create comprehensive unit tests
+- [x] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Depth-first search algorithm for cycle detection
+- Set-based prerequisite lookup for efficiency
+- Hierarchical validation from DevelopmentPlan down
+
+**Files to Create**:
+- None (add to existing models.py)
+
+**Files to Modify**:
+- `claude_planner/models.py` - Add DevelopmentPlan dataclass
+- `tests/test_models.py` - Add tests for DevelopmentPlan
+
+**Success Criteria**:
+- [x] DevelopmentPlan holds all phases
+- [x] get_all_subtask_ids() returns all subtask IDs
+- [x] validate_prerequisites() checks all prerequisites exist
+- [x] validate_circular_dependencies() detects cycles using DFS
+- [x] All tests pass
+- [x] 100% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**: Added DevelopmentPlan dataclass with comprehensive cross-model validation
+- **Files Created**: None
+- **Files Modified**:
+  - `claude_planner/models.py` (+210 lines, added DevelopmentPlan with cross-validation)
+  - `tests/test_models.py` (+282 lines, added 14 new tests)
+- **Tests**: 58 total unit tests (100% coverage)
+  - ProjectBrief: 13 tests
+  - Subtask: 8 tests
+  - Task: 6 tests
+  - Phase: 7 tests
+  - TechStack: 10 tests
+  - DevelopmentPlan: 14 tests (creation, prerequisite validation, circular dependency detection)
+- **Build**: ✅ Success
+  - All tests pass (58/58)
+  - Coverage: 100% (219/219 statements)
+  - Ruff linting: Clean
+  - Mypy type checking: Success
+- **Branch**: main
+- **Notes**: DevelopmentPlan model complete with cross-model validation:
+  - get_all_subtask_ids(): Collects all subtask IDs across all phases
+  - validate_prerequisites(): Ensures all prerequisites reference existing subtasks
+  - validate_circular_dependencies(): Uses DFS to detect cycles in prerequisite graph
+  - Detects self-references (subtask depending on itself)
+  - Detects simple cycles (A -> B -> A)
+  - Detects complex cycles in larger graphs
+  - validate() method performs full validation:
+    - Project name validation
+    - Must have at least one phase
+    - Validates each phase (hierarchical validation)
+    - Validates tech stack if provided
+    - Cross-model prerequisite validation
+    - Circular dependency detection
+  All data models complete! Phase 1 finished.
 
 ---
 

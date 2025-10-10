@@ -1,6 +1,13 @@
 """Tests for data models."""
 
-from claude_planner.models import Phase, ProjectBrief, Subtask, Task, TechStack
+from claude_planner.models import (
+    DevelopmentPlan,
+    Phase,
+    ProjectBrief,
+    Subtask,
+    Task,
+    TechStack,
+)
 
 
 class TestProjectBrief:
@@ -671,3 +678,279 @@ class TestTechStack:
 
         assert len(stack.additional_tools) == 2
         assert stack.additional_tools["cache"] == "Redis"
+
+
+class TestDevelopmentPlan:
+    """Tests for the DevelopmentPlan dataclass."""
+
+    def test_create_minimal_plan(self) -> None:
+        """Test creating a DevelopmentPlan with minimal fields."""
+        plan = DevelopmentPlan(project_name="Test Project")
+
+        assert plan.project_name == "Test Project"
+        assert plan.phases == []
+        assert plan.tech_stack is None
+
+    def test_create_plan_with_tech_stack(self) -> None:
+        """Test creating a DevelopmentPlan with tech stack."""
+        stack = TechStack(language="Python 3.11")
+        plan = DevelopmentPlan(project_name="Test Project", tech_stack=stack)
+
+        assert plan.tech_stack is not None
+        assert plan.tech_stack.language == "Python 3.11"
+
+    def test_get_all_subtask_ids(self) -> None:
+        """Test getting all subtask IDs from the plan."""
+        plan = DevelopmentPlan(project_name="Test")
+
+        # Add phase with tasks and subtasks
+        phase = Phase(id="0", title="Foundation", goal="Setup")
+        task = Task(id="0.1", title="Init")
+        task.subtasks.append(
+            Subtask(
+                id="0.1.1",
+                title="Test (Single Session)",
+                deliverables=["A", "B", "C"],
+            )
+        )
+        task.subtasks.append(
+            Subtask(
+                id="0.1.2",
+                title="Test2 (Single Session)",
+                deliverables=["A", "B", "C"],
+            )
+        )
+        phase.tasks.append(task)
+        plan.phases.append(phase)
+
+        subtask_ids = plan.get_all_subtask_ids()
+
+        assert len(subtask_ids) == 2
+        assert "0.1.1" in subtask_ids
+        assert "0.1.2" in subtask_ids
+
+    def test_validate_prerequisites_valid(self) -> None:
+        """Test prerequisite validation with valid prerequisites."""
+        plan = DevelopmentPlan(project_name="Test")
+        phase = Phase(id="0", title="Foundation", goal="Setup")
+        task = Task(id="0.1", title="Init")
+
+        # First subtask has no prerequisites
+        s1 = Subtask(id="0.1.1", title="A (Single Session)", deliverables=["A", "B", "C"])
+
+        # Second subtask depends on first
+        s2 = Subtask(
+            id="0.1.2",
+            title="B (Single Session)",
+            deliverables=["A", "B", "C"],
+            prerequisites=["0.1.1"],
+        )
+
+        task.subtasks.extend([s1, s2])
+        phase.tasks.append(task)
+        plan.phases.append(phase)
+
+        errors = plan.validate_prerequisites()
+        assert errors == []
+
+    def test_validate_prerequisites_invalid(self) -> None:
+        """Test prerequisite validation with non-existent prerequisite."""
+        plan = DevelopmentPlan(project_name="Test")
+        phase = Phase(id="0", title="Foundation", goal="Setup")
+        task = Task(id="0.1", title="Init")
+
+        # Subtask with non-existent prerequisite
+        task.subtasks.append(
+            Subtask(
+                id="0.1.1",
+                title="Test (Single Session)",
+                deliverables=["A", "B", "C"],
+                prerequisites=["9.9.9"],  # Does not exist
+            )
+        )
+
+        phase.tasks.append(task)
+        plan.phases.append(phase)
+
+        errors = plan.validate_prerequisites()
+        assert len(errors) == 1
+        assert "9.9.9" in errors[0]
+        assert "does not exist" in errors[0]
+
+    def test_validate_circular_dependencies_none(self) -> None:
+        """Test circular dependency detection with no cycles."""
+        plan = DevelopmentPlan(project_name="Test")
+        phase = Phase(id="0", title="Foundation", goal="Setup")
+        task = Task(id="0.1", title="Init")
+
+        # Linear dependency chain: 0.1.1 -> 0.1.2 -> 0.1.3
+        s1 = Subtask(id="0.1.1", title="A (Single Session)", deliverables=["A", "B", "C"])
+        s2 = Subtask(
+            id="0.1.2",
+            title="B (Single Session)",
+            deliverables=["A", "B", "C"],
+            prerequisites=["0.1.1"],
+        )
+        s3 = Subtask(
+            id="0.1.3",
+            title="C (Single Session)",
+            deliverables=["A", "B", "C"],
+            prerequisites=["0.1.2"],
+        )
+
+        task.subtasks.extend([s1, s2, s3])
+        phase.tasks.append(task)
+        plan.phases.append(phase)
+
+        errors = plan.validate_circular_dependencies()
+        assert errors == []
+
+    def test_validate_circular_dependencies_simple_cycle(self) -> None:
+        """Test circular dependency detection with simple cycle."""
+        plan = DevelopmentPlan(project_name="Test")
+        phase = Phase(id="0", title="Foundation", goal="Setup")
+        task = Task(id="0.1", title="Init")
+
+        # Create circular dependency: 0.1.1 -> 0.1.2 -> 0.1.1
+        s1 = Subtask(
+            id="0.1.1",
+            title="A (Single Session)",
+            deliverables=["A", "B", "C"],
+            prerequisites=["0.1.2"],
+        )
+        s2 = Subtask(
+            id="0.1.2",
+            title="B (Single Session)",
+            deliverables=["A", "B", "C"],
+            prerequisites=["0.1.1"],
+        )
+
+        task.subtasks.extend([s1, s2])
+        phase.tasks.append(task)
+        plan.phases.append(phase)
+
+        errors = plan.validate_circular_dependencies()
+        assert len(errors) > 0
+        assert any("Circular dependency" in error for error in errors)
+
+    def test_validate_circular_dependencies_self_reference(self) -> None:
+        """Test circular dependency detection with self-reference."""
+        plan = DevelopmentPlan(project_name="Test")
+        phase = Phase(id="0", title="Foundation", goal="Setup")
+        task = Task(id="0.1", title="Init")
+
+        # Subtask depends on itself
+        task.subtasks.append(
+            Subtask(
+                id="0.1.1",
+                title="Test (Single Session)",
+                deliverables=["A", "B", "C"],
+                prerequisites=["0.1.1"],
+            )
+        )
+
+        phase.tasks.append(task)
+        plan.phases.append(phase)
+
+        errors = plan.validate_circular_dependencies()
+        assert len(errors) > 0
+        assert any("Circular dependency" in error for error in errors)
+
+    def test_validate_valid_plan(self) -> None:
+        """Test validation of a valid complete plan."""
+        stack = TechStack(language="Python 3.11")
+        plan = DevelopmentPlan(project_name="Test Project", tech_stack=stack)
+
+        phase = Phase(id="0", title="Foundation", goal="Setup")
+        task = Task(id="0.1", title="Init")
+        task.subtasks.append(
+            Subtask(
+                id="0.1.1",
+                title="Setup (Single Session)",
+                deliverables=["A", "B", "C"],
+            )
+        )
+        phase.tasks.append(task)
+        plan.phases.append(phase)
+
+        errors = plan.validate()
+        assert errors == []
+        assert plan.is_valid() is True
+
+    def test_validate_missing_project_name(self) -> None:
+        """Test validation fails with missing project name."""
+        plan = DevelopmentPlan(project_name="")
+
+        errors = plan.validate()
+        assert any("project_name" in error for error in errors)
+        assert plan.is_valid() is False
+
+    def test_validate_no_phases(self) -> None:
+        """Test validation fails with no phases."""
+        plan = DevelopmentPlan(project_name="Test")
+
+        errors = plan.validate()
+        assert any("at least one phase" in error for error in errors)
+        assert plan.is_valid() is False
+
+    def test_validate_invalid_tech_stack(self) -> None:
+        """Test validation includes tech stack errors."""
+        stack = TechStack(language="")  # Invalid: empty language
+        plan = DevelopmentPlan(project_name="Test", tech_stack=stack)
+
+        phase = Phase(id="0", title="Foundation", goal="Setup")
+        task = Task(id="0.1", title="Init")
+        task.subtasks.append(
+            Subtask(
+                id="0.1.1",
+                title="Test (Single Session)",
+                deliverables=["A", "B", "C"],
+            )
+        )
+        phase.tasks.append(task)
+        plan.phases.append(phase)
+
+        errors = plan.validate()
+        assert any("TechStack" in error and "language" in error for error in errors)
+        assert plan.is_valid() is False
+
+    def test_validate_includes_phase_errors(self) -> None:
+        """Test validation includes errors from phases."""
+        plan = DevelopmentPlan(project_name="Test")
+
+        # Add invalid phase (no tasks)
+        phase = Phase(id="0", title="Foundation", goal="Setup")
+        plan.phases.append(phase)
+
+        errors = plan.validate()
+        assert any("at least one task" in error for error in errors)
+        assert plan.is_valid() is False
+
+    def test_validate_multiple_errors(self) -> None:
+        """Test validation reports multiple errors."""
+        plan = DevelopmentPlan(project_name="Test")
+        phase = Phase(id="0", title="Foundation", goal="Setup")
+        task = Task(id="0.1", title="Init")
+
+        # Add subtask with invalid prerequisite AND create circular dependency
+        s1 = Subtask(
+            id="0.1.1",
+            title="A (Single Session)",
+            deliverables=["A", "B", "C"],
+            prerequisites=["9.9.9", "0.1.2"],  # 9.9.9 doesn't exist
+        )
+        s2 = Subtask(
+            id="0.1.2",
+            title="B (Single Session)",
+            deliverables=["A", "B", "C"],
+            prerequisites=["0.1.1"],  # Creates circular dependency
+        )
+
+        task.subtasks.extend([s1, s2])
+        phase.tasks.append(task)
+        plan.phases.append(phase)
+
+        errors = plan.validate()
+        # Should have both prerequisite and circular dependency errors
+        assert len(errors) >= 2
+        assert plan.is_valid() is False

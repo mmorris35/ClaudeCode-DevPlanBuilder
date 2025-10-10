@@ -488,3 +488,211 @@ class TechStack:
         result.update(self.additional_tools)
 
         return result
+
+
+@dataclass
+class DevelopmentPlan:
+    """Represents a complete development plan with all phases.
+
+    This dataclass holds all phases of a development plan and provides
+    cross-model validation for prerequisites and circular dependencies.
+
+    Attributes:
+        project_name: Name of the project
+        phases: List of Phase objects
+        tech_stack: Technology stack for the project
+
+    Example:
+        >>> plan = DevelopmentPlan(
+        ...     project_name="My Project",
+        ...     phases=[],
+        ...     tech_stack=TechStack(language="Python")
+        ... )
+        >>> print(plan.project_name)
+        My Project
+    """
+
+    project_name: str
+    phases: list[Phase] = field(default_factory=list)
+    tech_stack: TechStack | None = None
+
+    def get_all_subtask_ids(self) -> set[str]:
+        """Get all subtask IDs in the plan.
+
+        Returns:
+            Set of all subtask IDs across all phases.
+
+        Example:
+            >>> plan = DevelopmentPlan(project_name="Test")
+            >>> phase = Phase(id="0", title="Foundation", goal="Setup")
+            >>> task = Task(id="0.1", title="Init")
+            >>> task.subtasks.append(Subtask(
+            ...     id="0.1.1", title="Test (Single Session)",
+            ...     deliverables=["A", "B", "C"]
+            ... ))
+            >>> phase.tasks.append(task)
+            >>> plan.phases.append(phase)
+            >>> "0.1.1" in plan.get_all_subtask_ids()
+            True
+        """
+        subtask_ids = set()
+        for phase in self.phases:
+            for task in phase.tasks:
+                for subtask in task.subtasks:
+                    subtask_ids.add(subtask.id)
+        return subtask_ids
+
+    def validate_prerequisites(self) -> list[str]:
+        """Validate that all prerequisites reference existing subtasks.
+
+        Returns:
+            List of validation error messages. Empty list if valid.
+
+        Example:
+            >>> plan = DevelopmentPlan(project_name="Test")
+            >>> phase = Phase(id="0", title="Foundation", goal="Setup")
+            >>> task = Task(id="0.1", title="Init")
+            >>> task.subtasks.append(Subtask(
+            ...     id="0.1.1", title="Test (Single Session)",
+            ...     deliverables=["A", "B", "C"],
+            ...     prerequisites=["9.9.9"]  # Non-existent
+            ... ))
+            >>> phase.tasks.append(task)
+            >>> plan.phases.append(phase)
+            >>> errors = plan.validate_prerequisites()
+            >>> len(errors) > 0
+            True
+        """
+        errors = []
+        all_subtask_ids = self.get_all_subtask_ids()
+
+        for phase in self.phases:
+            for task in phase.tasks:
+                for subtask in task.subtasks:
+                    for prereq in subtask.prerequisites:
+                        if prereq not in all_subtask_ids:
+                            errors.append(
+                                f"Subtask {subtask.id}: prerequisite '{prereq}' "
+                                "does not exist in the plan"
+                            )
+
+        return errors
+
+    def validate_circular_dependencies(self) -> list[str]:
+        """Validate that there are no circular dependencies.
+
+        Uses depth-first search to detect cycles in the prerequisite graph.
+
+        Returns:
+            List of validation error messages. Empty list if valid.
+
+        Example:
+            >>> plan = DevelopmentPlan(project_name="Test")
+            >>> phase = Phase(id="0", title="Foundation", goal="Setup")
+            >>> task = Task(id="0.1", title="Init")
+            >>> # Create circular dependency: 0.1.1 -> 0.1.2 -> 0.1.1
+            >>> s1 = Subtask(id="0.1.1", title="A (Single Session)",
+            ...              deliverables=["A", "B", "C"], prerequisites=["0.1.2"])
+            >>> s2 = Subtask(id="0.1.2", title="B (Single Session)",
+            ...              deliverables=["A", "B", "C"], prerequisites=["0.1.1"])
+            >>> task.subtasks.extend([s1, s2])
+            >>> phase.tasks.append(task)
+            >>> plan.phases.append(phase)
+            >>> errors = plan.validate_circular_dependencies()
+            >>> len(errors) > 0
+            True
+        """
+        errors = []
+
+        # Build prerequisite graph
+        prereq_graph: dict[str, list[str]] = {}
+        for phase in self.phases:
+            for task in phase.tasks:
+                for subtask in task.subtasks:
+                    prereq_graph[subtask.id] = subtask.prerequisites
+
+        # Detect cycles using DFS
+        visited: set[str] = set()
+        rec_stack: set[str] = set()
+
+        def has_cycle(node: str) -> bool:
+            visited.add(node)
+            rec_stack.add(node)
+
+            for neighbor in prereq_graph.get(node, []):
+                if neighbor not in visited:
+                    if has_cycle(neighbor):
+                        return True
+                elif neighbor in rec_stack:
+                    return True
+
+            rec_stack.remove(node)
+            return False
+
+        # Check each subtask for cycles
+        for subtask_id in prereq_graph:
+            if subtask_id not in visited:
+                if has_cycle(subtask_id):
+                    errors.append(f"Circular dependency detected involving subtask {subtask_id}")
+
+        return errors
+
+    def validate(self) -> list[str]:
+        """Validate the entire development plan.
+
+        Returns:
+            List of validation error messages. Empty list if valid.
+
+        Example:
+            >>> plan = DevelopmentPlan(
+            ...     project_name="Test",
+            ...     tech_stack=TechStack(language="Python")
+            ... )
+            >>> errors = plan.validate()
+            >>> errors == []
+            True
+        """
+        errors = []
+
+        # Validate project name
+        if not self.project_name or not self.project_name.strip():
+            errors.append("project_name is required and cannot be empty")
+
+        # Validate phases
+        if len(self.phases) == 0:
+            errors.append("Development plan must have at least one phase")
+
+        # Validate each phase
+        for phase in self.phases:
+            phase_errors = phase.validate()
+            errors.extend(phase_errors)
+
+        # Validate tech stack if provided
+        if self.tech_stack:
+            stack_errors = self.tech_stack.validate()
+            errors.extend([f"TechStack: {error}" for error in stack_errors])
+
+        # Cross-model validation
+        prereq_errors = self.validate_prerequisites()
+        errors.extend(prereq_errors)
+
+        cycle_errors = self.validate_circular_dependencies()
+        errors.extend(cycle_errors)
+
+        return errors
+
+    def is_valid(self) -> bool:
+        """Check if the development plan is valid.
+
+        Returns:
+            True if valid (no validation errors), False otherwise.
+
+        Example:
+            >>> plan = DevelopmentPlan(
+            ...     project_name="Test",
+            ...     tech_stack=TechStack(language="Python")
+            ... )
+            >>> plan.is_valid()
+            False
+        """
+        return len(self.validate()) == 0
