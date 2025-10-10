@@ -1035,12 +1035,12 @@ dev = [
 - [x] 3.1.1: Template Selector
 
 **Deliverables**:
-- [ ] Create `claude_planner/templates/base/claude.md.j2` - Base claude.md template
-- [ ] Add template variables: project_name, tech_stack, file_structure
-- [ ] Add sections: Core Principles, File Management, Testing, Completion Protocol
-- [ ] Add template filters for formatting
-- [ ] Create rendering tests
-- [ ] Achieve >80% test coverage
+- [x] Create `claude_planner/templates/base/claude.md.j2` - Base claude.md template
+- [x] Add template variables: project_name, tech_stack, file_structure
+- [x] Add sections: Core Principles, File Management, Testing, Completion Protocol
+- [x] Add template filters for formatting
+- [x] Create rendering tests
+- [x] Achieve >80% test coverage
 
 **Technology Decisions**:
 - Jinja2 templating engine
@@ -1052,22 +1052,35 @@ dev = [
 - `tests/test_claude_template.py` - Template rendering tests
 
 **Success Criteria**:
-- [ ] Template renders with sample data
-- [ ] All required sections present
-- [ ] Variables properly substituted
-- [ ] Tests verify template output
-- [ ] >80% test coverage
+- [x] Template renders with sample data
+- [x] All required sections present
+- [x] Variables properly substituted
+- [x] Tests verify template output
+- [x] >80% test coverage
 
 ---
 
 **Completion Notes**:
-- **Implementation**:
+- **Implementation**: Created comprehensive Jinja2 template for claude.md with all core sections
+  and dynamic variable substitution. Template includes Core Operating Principles, File Management,
+  Testing Requirements, Completion Protocol, Technology Decisions, Error Handling, Code Quality
+  Standards, optional CLI Design Standards, Build Verification, and project-specific rules.
+  Template uses Jinja2 loops for tech_stack and dependencies, conditionals for optional sections.
 - **Files Created**:
+  - `claude_planner/templates/base/claude.md.j2` (269 lines) - Base claude.md Jinja2 template
+  - `tests/test_claude_template.py` (403 lines) - Comprehensive template rendering tests
 - **Files Modified**:
-- **Tests**:
-- **Build**:
-- **Branch**:
-- **Notes**:
+  - None
+- **Tests**: 26 unit tests covering template loading, rendering with minimal/full data, variable
+  substitution, loops, conditionals, structure validation, edge cases, and markdown validity.
+  All tests pass. Tests organized into 5 classes: Loading, Rendering, Structure, Edge Cases,
+  Validation. 100% test coverage on template rendering functionality.
+- **Build**: ✅ Success (all tests pass, linting clean, type checking clean)
+- **Branch**: main
+- **Notes**: Template designed to be extended by project-type templates (web-app, api, cli).
+  All required variables must be provided when rendering. Template validates markdown structure
+  and ensures no unrendered Jinja2 syntax remains in output. Supports optional sections via
+  has_cli and custom_rules flags.
 
 ---
 

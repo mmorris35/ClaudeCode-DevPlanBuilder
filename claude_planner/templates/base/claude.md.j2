@@ -1,0 +1,269 @@
+# Claude Code Development Rules - {{ project_name }}
+
+> This document defines HOW Claude Code should work on the {{ project_name }} project.
+> Read at the start of every session to maintain consistency.
+
+## Core Operating Principles
+
+### 1. Single Session Execution
+- ✅ Complete the ENTIRE subtask in this session
+- ✅ End every session with a git commit
+- ❌ If blocked, document why and mark as BLOCKED
+
+### 2. Read Before Acting
+**Every session must begin with:**
+1. Read DEVELOPMENT_PLAN.md completely
+2. Locate the specific subtask ID from the prompt
+3. Verify prerequisites are marked `[x]` complete
+4. Read completion notes from prerequisites for context
+
+### 3. File Management
+
+**Project Structure:**
+```
+{{ file_structure }}
+```
+
+**Creating Files:**
+- Use exact paths specified in subtask
+- Add proper module docstrings
+- Include type hints on all functions
+
+**Modifying Files:**
+- Only modify files listed in subtask
+- Preserve existing functionality
+- Update related tests
+
+### 4. Testing Requirements
+
+**Unit Tests:**
+- Write tests for EVERY new function/class
+- Place in `tests/` with `test_` prefix
+- Minimum coverage: {{ test_coverage_requirement }}% overall
+- Test success, failure, and edge cases
+
+**Running Tests:**
+```bash
+# All tests
+{{ test_command_all }}
+
+# Specific test file
+{{ test_command_specific }}
+
+# With coverage report
+{{ test_command_coverage }}
+```
+
+**Before Every Commit:**
+- [ ] All tests pass
+- [ ] Coverage >{{ test_coverage_requirement }}%
+- [ ] Linting passes ({{ linter }})
+- [ ] Type checking passes ({{ type_checker }})
+
+### 5. Completion Protocol
+
+**When a subtask is complete:**
+
+1. **Update DEVELOPMENT_PLAN.md** with completion notes:
+```markdown
+**Completion Notes:**
+- **Implementation**: Brief description of what was built
+- **Files Created**:
+  - `path/to/file.py` (234 lines)
+- **Files Modified**:
+  - `path/to/modified.py` (added new function)
+- **Tests**: X unit tests (Y% coverage)
+- **Build**: ✅ Success (all tests pass, linting clean)
+- **Branch**: feature/subtask-X-Y-Z
+- **Notes**: Any deviations, issues, or future work
+```
+
+2. **Check all checkboxes** in the subtask (change `[ ]` to `[x]`)
+
+3. **Git commit** with semantic message:
+```bash
+git add .
+git commit -m "{{ commit_type }}(component): Brief description
+
+- Detail 1
+- Detail 2
+- X% coverage on module"
+```
+
+4. **Report completion** with summary
+
+### 6. Technology Decisions
+
+**Tech Stack:**
+{% for category, tech in tech_stack.items() -%}
+- **{{ category }}**: {{ tech }}
+{% endfor %}
+**Key Dependencies:**
+```
+{% for dep in dependencies -%}
+{{ dep }}
+{% endfor %}
+```
+
+**Installing Dependencies:**
+```bash
+{{ install_command }}
+```
+
+### 7. Error Handling
+
+**If you encounter an error:**
+1. Attempt to fix using project patterns
+2. If blocked, update DEVELOPMENT_PLAN.md:
+   ```markdown
+   **Completion Notes:**
+   - **Status**: ❌ BLOCKED
+   - **Error**: [Detailed error message]
+   - **Attempted**: [What was tried]
+   - **Root Cause**: [Analysis]
+   - **Suggested Fix**: [What should be done]
+   ```
+3. Do NOT mark subtask complete if blocked
+4. Do NOT commit broken code
+5. Report immediately
+
+### 8. Code Quality Standards
+
+**Python Style:**
+- Follow PEP 8
+- Type hints on all functions: `def func(x: int) -> str:`
+- Docstrings: {{ docstring_style }} style
+- Max line length: {{ max_line_length }} characters
+- Use `{{ linter }}` for linting
+- Use `{{ type_checker }}` for type checking
+
+**Example Function:**
+```python
+def example_function(param: str) -> dict[str, Any]:
+    """Brief description of function.
+
+    Args:
+        param: Description of parameter
+
+    Returns:
+        Description of return value
+
+    Raises:
+        ValueError: If param is invalid
+
+    Example:
+        >>> result = example_function("test")
+        >>> result["key"]
+        'value'
+    """
+    if not param:
+        raise ValueError("param cannot be empty")
+
+    # Implementation...
+    return {"key": "value"}
+```
+
+**Imports:**
+- Standard library first
+- Third-party second
+- Local imports last
+- Alphabetical within each group
+
+**No:**
+- `print()` for output (use Click.echo or logging)
+- `exit()` (raise exceptions instead)
+- Bare `except:` (catch specific exceptions)
+- Global variables (use classes or pass parameters)
+
+{% if has_cli %}
+### 9. CLI Design Standards
+
+**Command Structure:**
+```bash
+{{ cli_command }} <command> [options] [arguments]
+```
+
+**All commands must:**
+- Have `--help` text with examples
+- Use Click's option validation
+- Provide clear error messages
+- Support `--verbose` for debug output
+- Return proper exit codes (0=success, 1=error)
+
+**Example Command:**
+```python
+@click.command()
+@click.argument('arg_name')
+@click.option('--option', type=click.Path(exists=True), required=True,
+              help='Option description')
+@click.option('--verbose', is_flag=True, help='Enable verbose output')
+def command_name(arg_name: str, option: str, verbose: bool):
+    """Command description.
+
+    Example:
+        {{ cli_command }} command_name arg --option value
+    """
+    # Implementation...
+```
+{% endif %}
+
+### 10. Build Verification
+
+**Before marking subtask complete:**
+
+```bash
+# Linting
+{{ lint_command }}
+
+# Type checking
+{{ type_check_command }}
+
+# Tests
+{{ test_command_all }}
+
+# Build package
+{{ build_command }}
+
+# Install and test
+{{ install_command }}
+{% if has_cli -%}
+{{ cli_command }} --help
+{% endif %}
+```
+
+**All must pass with no errors.**
+
+{% if custom_rules %}
+## Project-Specific Rules
+
+{% for rule_section in custom_rules %}
+### {{ rule_section.title }}
+
+{{ rule_section.content }}
+{% endfor %}
+{% endif %}
+
+## Checklist: Starting a New Session
+
+- [ ] Read DEVELOPMENT_PLAN.md completely
+- [ ] Locate subtask ID from prompt
+- [ ] Verify prerequisites marked `[x]`
+- [ ] Read prerequisite completion notes
+- [ ] Understand success criteria
+- [ ] Ready to code!
+
+## Checklist: Ending a Session
+
+- [ ] All subtask checkboxes checked
+- [ ] All tests pass (pytest)
+- [ ] Linting clean ({{ linter }})
+- [ ] Type checking clean ({{ type_checker }})
+- [ ] Completion notes written
+- [ ] Git commit with semantic message
+- [ ] User notified
+
+---
+
+**Version**: {{ version }}
+**Last Updated**: {{ last_updated }}
+**Project**: {{ project_name }}
