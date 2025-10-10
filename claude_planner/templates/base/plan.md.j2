@@ -1,0 +1,183 @@
+# {{ project_name }} - Development Plan
+
+## 🎯 How to Use This Plan
+
+**For Claude Code**: Read this plan, find the subtask ID from the prompt, complete ALL checkboxes, update completion notes, commit.
+
+**For You**: Use this prompt (change only the subtask ID):
+```
+please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for context, I know it will eat tokens and take time), then continue with [X.Y.Z], following all of the development plan and claude.md rules.
+```
+
+---
+
+## Project Overview
+
+**Project Name**: {{ project_name }}
+
+**Goal**: {{ goal }}
+
+**Target Users**: {{ target_users }}
+
+**Timeline**: {{ timeline }}
+
+{% if mvp_scope -%}
+**MVP Scope**:
+{% for item in mvp_scope -%}
+- {{ item }}
+{% endfor %}
+{%- endif %}
+
+---
+
+## Technology Stack
+
+{% for category, technology in tech_stack.items() -%}
+**{{ category }}**: {{ technology }}
+{% endfor %}
+
+{% if key_libraries -%}
+**Key Libraries**: {{ key_libraries | join(', ') }}
+{%- endif %}
+
+---
+
+## Progress Tracking
+
+{% for phase in phases %}
+### Phase {{ phase.id }}: {{ phase.title }}{% if phase.timeline %} ({{ phase.timeline }}){% endif %}
+
+{% for task in phase.tasks -%}
+{% for subtask in task.subtasks -%}
+- [{{ 'x' if subtask.status == 'complete' else ' ' }}] {{ subtask.id }}: {{ subtask.title }}
+{% endfor %}
+{%- endfor %}
+{% endfor %}
+
+**Current**: Phase {{ current_phase }}
+**Next**: {{ next_subtask }}
+
+---
+
+{% for phase in phases %}
+## Phase {{ phase.id }}: {{ phase.title }}{% if phase.timeline %} ({{ phase.timeline }}){% endif %}
+
+**Goal**: {{ phase.goal }}
+
+{% if phase.prerequisites -%}
+**Prerequisites**: {{ phase.prerequisites }}
+{% endif %}
+{% for task in phase.tasks %}
+---
+
+### Task {{ task.id }}: {{ task.title }}
+
+{% if task.goal -%}
+**Goal**: {{ task.goal }}
+{% endif %}
+{% for subtask in task.subtasks %}
+**Subtask {{ subtask.id }}: {{ subtask.title }}**
+
+**Prerequisites**:
+{% if subtask.prerequisites -%}
+{% for prereq in subtask.prerequisites -%}
+- [{{ 'x' if prereq.complete else ' ' }}] {{ prereq }}
+{% endfor %}
+{%- else -%}
+- None
+{% endif %}
+
+**Deliverables**:
+{% for deliverable in subtask.deliverables -%}
+- [{{ 'x' if subtask.status == 'complete' else ' ' }}] {{ deliverable }}
+{% endfor %}
+
+{% if subtask.technology_decisions -%}
+**Technology Decisions**:
+{% for decision in subtask.technology_decisions -%}
+- {{ decision }}
+{% endfor %}
+{% endif %}
+
+{% if subtask.files_to_create -%}
+**Files to Create**:
+{% for file in subtask.files_to_create -%}
+- `{{ file.path }}` - {{ file.description }}
+{% endfor %}
+{% endif %}
+
+{% if subtask.files_to_modify -%}
+**Files to Modify**:
+{% for file in subtask.files_to_modify -%}
+- `{{ file.path }}` - {{ file.description }}
+{% endfor %}
+{%- endif %}
+
+**Success Criteria**:
+{% for criterion in subtask.success_criteria -%}
+- [{{ 'x' if subtask.status == 'complete' else ' ' }}] {{ criterion }}
+{% endfor %}
+
+---
+
+**Completion Notes**:
+{% if subtask.completion_notes -%}
+- **Implementation**: {{ subtask.completion_notes.implementation }}
+- **Files Created**:
+{% for file in subtask.completion_notes.files_created %}  - {{ file }}
+{% endfor -%}
+- **Files Modified**:
+{% if subtask.completion_notes.files_modified -%}
+{% for file in subtask.completion_notes.files_modified %}  - {{ file }}
+{% endfor -%}
+{%- else %}  - None
+{% endif -%}
+- **Tests**: {{ subtask.completion_notes.tests }}
+- **Build**: {{ subtask.completion_notes.build }}
+- **Branch**: {{ subtask.completion_notes.branch }}
+- **Notes**: {{ subtask.completion_notes.notes }}
+{%- else -%}
+- **Implementation**:
+- **Files Created**:
+- **Files Modified**:
+- **Tests**:
+- **Build**:
+- **Branch**:
+- **Notes**:
+{% endif %}
+
+---
+{% endfor %}
+{% endfor %}
+{% endfor %}
+
+{% if success_metrics %}
+---
+
+## Success Metrics
+
+{% for category, metrics in success_metrics.items() %}
+**{{ category }}**:
+{% for metric in metrics -%}
+- {{ metric }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+
+{% if timeline_summary %}
+---
+
+## Timeline Summary
+
+| Phase | Days | Deliverable | Status |
+|-------|------|-------------|--------|
+{% for phase_summary in timeline_summary -%}
+| Phase {{ phase_summary.id }} | {{ phase_summary.days }} | {{ phase_summary.deliverable }} | [{{ 'x' if phase_summary.complete else ' ' }}] |
+{% endfor %}
+
+**Total**: {{ total_timeline }}
+{% endif %}
+
+---
+
+_This development plan is a living document. Update completion notes after each subtask._
