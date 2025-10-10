@@ -1,0 +1,24 @@
+name: api
+description: RESTful API service template
+version: 1.0.0
+author: Claude Code
+project_types:
+  - API
+  - api
+  - REST API
+  - rest-api
+extends: base
+default_tech_stack:
+  framework: FastAPI
+  database: PostgreSQL
+  cache: Redis
+  deployment: Docker + AWS
+default_phases:
+  - Foundation
+  - Data Models
+  - API Endpoints
+  - Authentication
+  - Validation & Error Handling
+  - Documentation
+  - Testing
+  - Deployment

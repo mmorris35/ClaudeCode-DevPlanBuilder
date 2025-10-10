@@ -1,0 +1,22 @@
+name: web-app
+description: Full-stack web application template
+version: 1.0.0
+author: Claude Code
+project_types:
+  - Web App
+  - web-app
+  - webapp
+extends: base
+default_tech_stack:
+  frontend: React + Next.js
+  backend: Python + FastAPI
+  database: PostgreSQL
+  deployment: Vercel + AWS
+default_phases:
+  - Foundation
+  - Frontend Development
+  - Backend Development
+  - Database Setup
+  - Integration
+  - Testing & QA
+  - Deployment

@@ -1,0 +1,6 @@
+name: base
+description: Base template with common functionality
+version: 1.0.0
+author: Claude Code
+project_types:
+  - default

@@ -1,0 +1,24 @@
+name: cli
+description: Command-line interface tool template
+version: 1.0.0
+author: Claude Code
+project_types:
+  - CLI
+  - CLI Tool
+  - cli
+  - cli-tool
+  - Command Line
+extends: base
+default_tech_stack:
+  framework: Click
+  language: Python 3.11+
+  packaging: setuptools
+  deployment: PyPI
+default_phases:
+  - Foundation
+  - Command Structure
+  - Command Implementation
+  - Argument Parsing
+  - Configuration Management
+  - Testing
+  - Distribution

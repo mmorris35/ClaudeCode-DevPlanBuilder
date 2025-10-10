@@ -68,7 +68,7 @@ please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for cont
 - [x] 2.2.1: Complete Parser Pipeline
 
 ### Phase 3: Template System (Week 1, Days 4-5)
-- [ ] 3.1.1: Template Selector
+- [x] 3.1.1: Template Selector
 - [ ] 3.1.2: Jinja2 Template - claude.md
 - [ ] 3.1.3: Jinja2 Template - DEVELOPMENT_PLAN.md
 - [ ] 3.2.1: Template Renderer
@@ -970,13 +970,13 @@ dev = [
 - [x] 2.2.1: Complete Parser Pipeline
 
 **Deliverables**:
-- [ ] Create `claude_planner/templates/selector.py`
-- [ ] Implement `list_templates()` - List available templates
-- [ ] Implement `select_template()` - Choose template based on project type
-- [ ] Implement `load_template_config()` - Load template metadata from YAML
-- [ ] Create template registry system
-- [ ] Create unit tests
-- [ ] Achieve >80% test coverage
+- [x] Create `claude_planner/templates/selector.py`
+- [x] Implement `list_templates()` - List available templates
+- [x] Implement `select_template()` - Choose template based on project type
+- [x] Implement `load_template_config()` - Load template metadata from YAML
+- [x] Create template registry system
+- [x] Create unit tests
+- [x] Achieve >80% test coverage
 
 **Technology Decisions**:
 - Templates stored in `claude_planner/templates/{template_name}/`
@@ -988,22 +988,44 @@ dev = [
 - `tests/test_selector.py` - Selector unit tests
 
 **Success Criteria**:
-- [ ] list_templates() returns list of available template names
-- [ ] select_template(project_type) returns template path
-- [ ] load_template_config() reads and validates template metadata
-- [ ] All tests pass
-- [ ] >80% test coverage
+- [x] list_templates() returns list of available template names
+- [x] select_template(project_type) returns template path
+- [x] load_template_config() reads and validates template metadata
+- [x] All tests pass
+- [x] >80% test coverage
 
 ---
 
 **Completion Notes**:
-- **Implementation**:
+- **Implementation**: Created template selector module with discovery, selection, and config loading
 - **Files Created**:
-- **Files Modified**:
-- **Tests**:
-- **Build**:
-- **Branch**:
-- **Notes**:
+  - `claude_planner/templates/selector.py` (53 statements, 160 lines)
+  - `tests/test_selector.py` (18 comprehensive unit tests, 198 lines)
+  - `claude_planner/templates/base/config.yaml` (Base template metadata)
+  - `claude_planner/templates/web-app/config.yaml` (Web app template metadata)
+  - `claude_planner/templates/api/config.yaml` (API template metadata)
+  - `claude_planner/templates/cli/config.yaml` (CLI tool template metadata)
+- **Files Modified**: None
+- **Tests**: 18 unit tests (96.23% coverage)
+  - list_templates: 3 tests (returns all, sorted, excludes non-dirs)
+  - select_template: 7 tests (CLI/web-app/API, case insensitive, alternatives, fallback, whitespace)
+  - load_template_config: 8 tests (base/web-app/API/CLI configs, missing file, invalid YAML, missing fields, not dict)
+- **Build**: ✅ Success
+  - All tests pass (18/18)
+  - Coverage: 96.23% (53/53 statements, 51 covered, 2 unreachable error paths)
+  - Ruff linting: Clean
+  - Mypy type checking: Success
+- **Branch**: main
+- **Notes**: Template selector complete with registry system:
+  - list_templates(): Discovers templates by scanning directory for config.yaml files
+  - select_template(): Smart matching with case-insensitive, whitespace handling, fallback to base
+  - load_template_config(): Loads and validates YAML configs with required field checking
+  - Template directory structure: base/, web-app/, api/, cli/
+  - Each config.yaml includes: name, description, version, project_types, default_tech_stack, default_phases
+  - Project type matching supports multiple aliases (e.g., "CLI Tool", "cli", "CLI" all match)
+  - Helper functions: _get_templates_dir(), _matches_project_type()
+  - PyYAML used for config parsing with safe_load()
+  Ready for Jinja2 template files in subtask 3.1.2
 
 ---
 
