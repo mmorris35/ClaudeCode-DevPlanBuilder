@@ -1342,12 +1342,12 @@ dev = [
 - [x] 3.3.2: API Template
 
 **Deliverables**:
-- [ ] Create `claude_planner/templates/cli/config.yaml` - Template metadata
-- [ ] Create `claude_planner/templates/cli/claude.md.j2` - CLI specific rules
-- [ ] Create `claude_planner/templates/cli/plan.md.j2` - CLI specific phases
-- [ ] Define CLI specific tech stack defaults
-- [ ] Define CLI specific phases (Commands, Args, Config, Dist, etc.)
-- [ ] Create template tests
+- [x] Create `claude_planner/templates/cli/config.yaml` - Template metadata
+- [x] Create `claude_planner/templates/cli/claude.md.j2` - CLI specific rules
+- [x] Create `claude_planner/templates/cli/plan.md.j2` - CLI specific phases
+- [x] Define CLI specific tech stack defaults
+- [x] Define CLI specific phases (Commands, Args, Config, Dist, etc.)
+- [x] Create template tests
 
 **Technology Decisions**:
 - Extends base templates
@@ -1361,21 +1361,45 @@ dev = [
 - `tests/test_cli_template.py`
 
 **Success Criteria**:
-- [ ] Template renders complete CLI project
-- [ ] Tech stack appropriate for CLIs
-- [ ] Phases cover commands, args, distribution
-- [ ] All tests pass
+- [x] Template renders complete CLI project
+- [x] Tech stack appropriate for CLIs
+- [x] Phases cover commands, args, distribution
+- [x] All tests pass
 
 ---
 
 **Completion Notes**:
-- **Implementation**:
+- **Implementation**: Created CLI template that extends base templates using Jinja2 template
+  inheritance. Config.yaml defines template metadata including name, description, project_types
+  for template selection (CLI, CLI Tool, cli, cli-tool, Command Line), default_tech_stack (Click
+  framework, Python 3.11+ language, setuptools packaging, PyPI deployment), and default_phases
+  (Foundation, Command Structure, Command Implementation, Argument Parsing, Configuration Management,
+  Testing, Distribution). claude.md.j2 and plan.md.j2 templates use {% extends %} to inherit all base
+  template content while allowing future customization. Template properly integrates with renderer to
+  generate complete CLI projects with appropriate tech stack for command-line tools.
 - **Files Created**:
+  - `claude_planner/templates/cli/claude.md.j2` (2 lines) - Extends base claude.md template
+  - `claude_planner/templates/cli/plan.md.j2` (2 lines) - Extends base plan.md template
+  - `tests/test_cli_template.py` (405 lines) - Comprehensive CLI template tests
 - **Files Modified**:
-- **Tests**:
-- **Build**:
-- **Branch**:
-- **Notes**:
+  - `claude_planner/templates/cli/config.yaml` (already existed from 3.1.1, verified content)
+- **Tests**: 18 unit tests covering config validation, template existence, template inheritance,
+  rendering with CLI data, base section inclusion, CLI Design Standards section inclusion (verifies
+  has_cli flag works), phase rendering, full project rendering, and tech stack consistency. Tests
+  organized into 4 classes: CLIConfig, CLIClaudeTemplate, CLIPlanTemplate, CLIFullRendering. All
+  tests pass. Tests verify template extends base, renders with CLI specific tech stack (Click,
+  Python 3.11+, setuptools, PyPI), and includes CLI phases (Command Structure, Command Implementation,
+  Argument Parsing, Configuration Management, Distribution).
+- **Build**: ✅ Success (all tests pass, linting clean, type checking clean)
+- **Branch**: main
+- **Notes**: Templates use Jinja2 {% extends %} directive for template inheritance, allowing them to
+  inherit all base template content while keeping template files minimal. Config.yaml provides
+  metadata for template selector to match project types. Default tech stack appropriate for modern
+  CLI tools using Click framework. Default phases cover complete CLI development lifecycle including
+  command structure, implementation, argument parsing, configuration, and distribution to PyPI.
+  Template successfully renders via renderer module and produces valid claude.md and
+  DEVELOPMENT_PLAN.md files. This completes Phase 3 (Template System) with all three project-type
+  templates (web-app, api, cli) now available.
 
 ---
 
