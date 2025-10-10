@@ -62,7 +62,7 @@ please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for cont
 - [x] 1.2.1: Model Validation
 
 ### Phase 2: PROJECT_BRIEF Parser (Week 1, Days 3-4)
-- [ ] 2.1.1: Markdown Parser
+- [x] 2.1.1: Markdown Parser
 - [ ] 2.1.2: Field Extractor
 - [ ] 2.1.3: Validator Integration
 - [ ] 2.2.1: Parser Tests
@@ -668,11 +668,88 @@ dev = [
 
 ---
 
+## Phase 2: PROJECT_BRIEF Parser (Week 1, Days 3-4)
+
+**Goal**: Parse PROJECT_BRIEF.md markdown files and extract structured content
+
+**Timeline**: 2 days (Days 3-4 of Week 1)
+
+**Prerequisites**: Phase 1 complete (Core Data Models)
+
+---
+
+### Task 2.1: Markdown Parser
+
+**Subtask 2.1.1: Markdown Parser (Single Session)**
+
+**Prerequisites**:
+- [x] 1.2.1: Model Validation
+
+**Deliverables**:
+- [x] Create `claude_planner/generator/parser.py`
+- [x] Implement `parse_markdown_file()` - Read file and extract sections
+- [x] Implement `parse_markdown_content()` - Split by ## headings
+- [x] Implement `extract_list_items()` - Extract list items (both - and 1. formats)
+- [x] Implement `extract_field_value()` - Extract field values from **Field**: value
+- [x] Implement `extract_checkbox_fields()` - Extract [x]/[ ] checkboxes
+- [x] Create comprehensive unit tests
+- [x] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Use regex for markdown pattern matching
+- Support both ordered (1.) and unordered (-) lists
+- Case-insensitive field extraction
+- Handle H1-H6 headings but track only H2+
+
+**Files to Create**:
+- `claude_planner/generator/parser.py` - Markdown parsing utilities
+- `tests/test_parser.py` - Parser unit tests
+
+**Success Criteria**:
+- [x] parse_markdown_file() reads files and extracts sections by ## headings
+- [x] parse_markdown_content() splits content into dict by heading
+- [x] extract_list_items() handles both - and 1. list formats
+- [x] extract_field_value() case-insensitive field extraction
+- [x] extract_checkbox_fields() detects [x] vs [ ] status
+- [x] All tests pass
+- [x] 100% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**: Created markdown parsing module with regex-based extraction utilities
+- **Files Created**:
+  - `claude_planner/generator/parser.py` (71 statements, 5 functions)
+  - `tests/test_parser.py` (34 comprehensive unit tests)
+- **Files Modified**: None
+- **Tests**: 34 unit tests (100% coverage)
+  - parse_markdown_file: 3 tests (valid file, file not found, read error)
+  - parse_markdown_content: 8 tests (basic sections, H1 ignored, multiple levels, empty sections, multiline, empty content, no sections, extra whitespace)
+  - extract_list_items: 7 tests (unordered, ordered, mixed markers, whitespace, empty lines, non-list lines, empty text)
+  - extract_field_value: 8 tests (basic field, without dash, case insensitive, with checkbox, multiline, not found, special chars, empty text)
+  - extract_checkbox_fields: 8 tests (checked, unchecked, mixed, case insensitive, without dash, whitespace, empty text, non-checkbox lines)
+- **Build**: ✅ Success
+  - All tests pass (34/34)
+  - Coverage: 100% (71/71 statements)
+  - Ruff linting: Clean
+  - Mypy type checking: Success
+- **Branch**: main
+- **Notes**: Markdown parser complete with comprehensive utilities:
+  - parse_markdown_file(): Reads files with UTF-8 encoding, proper error handling
+  - parse_markdown_content(): Uses regex to split by ## headings, ignores H1
+  - extract_list_items(): Handles -, *, + for unordered and 1., 2., etc for ordered lists
+  - extract_field_value(): Case-insensitive, removes checkboxes, handles special characters
+  - extract_checkbox_fields(): Detects [x]/[X] as checked, [ ] as unchecked
+  - All functions handle edge cases (empty input, whitespace, missing data)
+  - Exception chaining with "from e" for proper error context
+  Ready for use in PROJECT_BRIEF.md parsing
+
+---
+
 ## Remaining Phases
 
-Phases 1-10 follow the same pattern with specific subtasks for:
-- Phase 1: Data models (4 subtasks)
-- Phase 2: Parser (4 subtasks)
+Phases 2-10 follow the same pattern with specific subtasks for:
+- Phase 2: Parser (4 subtasks) - IN PROGRESS (2.1.1 complete)
 - Phase 3: Templates (7 subtasks)
 - Phase 4: Generator (5 subtasks)
 - Phase 5: CLI (5 subtasks)
