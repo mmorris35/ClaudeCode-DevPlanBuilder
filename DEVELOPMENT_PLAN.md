@@ -57,7 +57,7 @@ please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for cont
 
 ### Phase 1: Core Data Models (Week 1, Days 2-3)
 - [x] 1.1.1: ProjectBrief Dataclass
-- [ ] 1.1.2: Phase/Task/Subtask Models
+- [x] 1.1.2: Phase/Task/Subtask Models
 - [ ] 1.1.3: TechStack Model
 - [ ] 1.2.1: Model Validation
 
@@ -462,6 +462,73 @@ dev = [
   - Mypy type checking: Success
 - **Branch**: main
 - **Notes**: ProjectBrief dataclass complete with all fields from PROJECT_BRIEF.md structure. Includes validation for required fields and supports all optional fields with proper defaults. Ready for parser to populate instances.
+
+---
+
+**Subtask 1.1.2: Phase/Task/Subtask Models (Single Session)**
+
+**Prerequisites**:
+- [x] 1.1.1: ProjectBrief Dataclass
+
+**Deliverables**:
+- [x] Add Subtask dataclass to models.py
+- [x] Add Task dataclass to models.py
+- [x] Add Phase dataclass to models.py
+- [x] Implement validation methods for all models
+- [x] Create comprehensive unit tests
+- [x] Achieve >80% test coverage
+
+**Technology Decisions**:
+- Python dataclasses for hierarchical structure
+- Regex for ID format validation
+- Validation rules from claude.md
+
+**Files to Create**:
+- None (add to existing models.py)
+
+**Files to Modify**:
+- `claude_planner/models.py` - Add Phase, Task, Subtask dataclasses
+- `tests/test_models.py` - Add tests for new models
+
+**Success Criteria**:
+- [x] Subtask dataclass with ID format validation (X.Y.Z)
+- [x] Task dataclass with ID format validation (X.Y)
+- [x] Phase dataclass with numeric ID validation
+- [x] Validation enforces "(Single Session)" suffix
+- [x] Validation enforces 3-7 deliverables
+- [x] Validation propagates through hierarchy
+- [x] All tests pass
+- [x] 100% test coverage
+
+---
+
+**Completion Notes**:
+- **Implementation**: Added Phase, Task, and Subtask dataclasses with comprehensive validation
+- **Files Created**: None
+- **Files Modified**:
+  - `claude_planner/models.py` (+244 lines, added Subtask/Task/Phase models with validation)
+  - `tests/test_models.py` (+291 lines, added 21 new tests)
+- **Tests**: 34 total unit tests (100% coverage)
+  - ProjectBrief: 13 tests
+  - Subtask: 8 tests (creation, validation, ID format, deliverables count, status)
+  - Task: 6 tests (creation, validation, ID format, subtask requirements)
+  - Phase: 7 tests (creation, validation, ID format, task requirements, Phase 0 check)
+- **Build**: ✅ Success
+  - All tests pass (34/34)
+  - Coverage: 100% (117/117 statements)
+  - Ruff linting: Clean (auto-fixed import order, f-string)
+  - Mypy type checking: Success
+- **Branch**: main
+- **Notes**: Complete hierarchical data model for development plans. Validation rules enforce:
+  - Subtask IDs in X.Y.Z format
+  - Task IDs in X.Y format
+  - Phase IDs must be numeric
+  - Subtasks must have "(Single Session)" in title
+  - Subtasks must have 3-7 deliverables
+  - Tasks must have at least 1 subtask
+  - Phases must have at least 1 task
+  - Phase 0 should be titled "Foundation" (warning)
+  - Validation errors propagate up the hierarchy
 
 ---
 

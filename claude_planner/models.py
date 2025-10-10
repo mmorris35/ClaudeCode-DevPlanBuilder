@@ -1,9 +1,11 @@
 """Data models for claude-code-project-planner.
 
 This module defines the core data structures used throughout the application,
-including the ProjectBrief dataclass that represents a parsed PROJECT_BRIEF.md file.
+including the ProjectBrief dataclass that represents a parsed PROJECT_BRIEF.md file,
+and Phase/Task/Subtask models for representing development plans.
 """
 
+import re
 from dataclasses import dataclass, field
 
 
@@ -154,5 +156,229 @@ class ProjectBrief:
             ...                      timeline="1 week")
             >>> brief.is_valid()
             True
+        """
+        return len(self.validate()) == 0
+
+
+@dataclass
+class Subtask:
+    """Represents a single subtask in a development plan.
+
+    A subtask is a unit of work that should be completable in a single session.
+    Each subtask has an ID, title, deliverables, prerequisites, and status.
+
+    Attributes:
+        id: Subtask ID in format "X.Y.Z" (e.g., "1.2.3")
+        title: Short descriptive title (should include "Single Session")
+        deliverables: List of deliverable items
+        prerequisites: List of prerequisite subtask IDs
+        files_to_create: List of files to be created
+        files_to_modify: List of files to be modified
+        success_criteria: List of success criteria
+        technology_decisions: List of technology choices made
+        status: Current status (pending, in_progress, completed)
+        completion_notes: Notes added when subtask is completed
+
+    Example:
+        >>> subtask = Subtask(
+        ...     id="1.1.1",
+        ...     title="Create models (Single Session)",
+        ...     deliverables=["Create models.py", "Add tests"]
+        ... )
+        >>> print(subtask.id)
+        1.1.1
+    """
+
+    id: str
+    title: str
+    deliverables: list[str] = field(default_factory=list)
+    prerequisites: list[str] = field(default_factory=list)
+    files_to_create: list[str] = field(default_factory=list)
+    files_to_modify: list[str] = field(default_factory=list)
+    success_criteria: list[str] = field(default_factory=list)
+    technology_decisions: list[str] = field(default_factory=list)
+    status: str = "pending"
+    completion_notes: dict[str, str] = field(default_factory=dict)
+
+    def validate(self) -> list[str]:
+        """Validate the subtask follows best practices.
+
+        Returns:
+            List of validation error messages. Empty list if valid.
+
+        Example:
+            >>> subtask = Subtask(id="invalid", title="Test",
+            ...                   deliverables=["Only one"])
+            >>> errors = subtask.validate()
+            >>> len(errors) > 0
+            True
+        """
+        errors = []
+
+        # Validate ID format (X.Y.Z)
+        if not re.match(r"^\d+\.\d+\.\d+$", self.id):
+            errors.append(f"Subtask ID '{self.id}' must be in format X.Y.Z")
+
+        # Validate title has "(Single Session)" suffix
+        if "(Single Session)" not in self.title:
+            errors.append("Subtask title should include '(Single Session)' suffix")
+
+        # Validate deliverables count (3-7 recommended)
+        if len(self.deliverables) < 3:
+            errors.append(
+                f"Subtask has {len(self.deliverables)} deliverables, recommended minimum is 3"
+            )
+        elif len(self.deliverables) > 7:
+            errors.append(
+                f"Subtask has {len(self.deliverables)} deliverables, recommended maximum is 7"
+            )
+
+        # Validate status
+        valid_statuses = ["pending", "in_progress", "completed", "blocked"]
+        if self.status not in valid_statuses:
+            errors.append(
+                f"Status '{self.status}' is invalid. Must be one of: {', '.join(valid_statuses)}"
+            )
+
+        return errors
+
+    def is_valid(self) -> bool:
+        """Check if the subtask is valid.
+
+        Returns:
+            True if valid (no validation errors), False otherwise.
+        """
+        return len(self.validate()) == 0
+
+
+@dataclass
+class Task:
+    """Represents a task in a development plan.
+
+    A task groups related subtasks together and belongs to a phase.
+
+    Attributes:
+        id: Task ID in format "X.Y" (e.g., "1.2")
+        title: Short descriptive title
+        description: Longer description of the task
+        subtasks: List of Subtask objects
+
+    Example:
+        >>> task = Task(id="1.1", title="Setup", description="Setup project")
+        >>> task.subtasks.append(Subtask(id="1.1.1", title="Init (Single Session)"))
+        >>> len(task.subtasks)
+        1
+    """
+
+    id: str
+    title: str
+    description: str = ""
+    subtasks: list[Subtask] = field(default_factory=list)
+
+    def validate(self) -> list[str]:
+        """Validate the task follows best practices.
+
+        Returns:
+            List of validation error messages. Empty list if valid.
+
+        Example:
+            >>> task = Task(id="invalid", title="Test")
+            >>> errors = task.validate()
+            >>> len(errors) > 0
+            True
+        """
+        errors = []
+
+        # Validate ID format (X.Y)
+        if not re.match(r"^\d+\.\d+$", self.id):
+            errors.append(f"Task ID '{self.id}' must be in format X.Y")
+
+        # Validate has at least one subtask
+        if len(self.subtasks) == 0:
+            errors.append(f"Task '{self.id}' must have at least one subtask")
+
+        # Validate all subtasks
+        for subtask in self.subtasks:
+            subtask_errors = subtask.validate()
+            errors.extend([f"Subtask {subtask.id}: {error}" for error in subtask_errors])
+
+        return errors
+
+    def is_valid(self) -> bool:
+        """Check if the task is valid.
+
+        Returns:
+            True if valid (no validation errors), False otherwise.
+        """
+        return len(self.validate()) == 0
+
+
+@dataclass
+class Phase:
+    """Represents a phase in a development plan.
+
+    A phase groups related tasks together and represents a major milestone.
+
+    Attributes:
+        id: Phase ID (integer as string, e.g., "0", "1")
+        title: Short descriptive title
+        description: Longer description of the phase
+        goal: What this phase aims to achieve
+        days: Estimated number of days
+        tasks: List of Task objects
+
+    Example:
+        >>> phase = Phase(id="0", title="Foundation",
+        ...               goal="Setup project", days="1-2")
+        >>> phase.tasks.append(Task(id="0.1", title="Setup"))
+        >>> len(phase.tasks)
+        1
+    """
+
+    id: str
+    title: str
+    goal: str
+    days: str = ""
+    description: str = ""
+    tasks: list[Task] = field(default_factory=list)
+
+    def validate(self) -> list[str]:
+        """Validate the phase follows best practices.
+
+        Returns:
+            List of validation error messages. Empty list if valid.
+
+        Example:
+            >>> phase = Phase(id="X", title="Test", goal="Test goal")
+            >>> errors = phase.validate()
+            >>> len(errors) > 0
+            True
+        """
+        errors = []
+
+        # Validate ID is numeric
+        if not self.id.isdigit():
+            errors.append(f"Phase ID '{self.id}' must be a number")
+
+        # Validate phase 0 is "Foundation" (warning)
+        if self.id == "0" and "Foundation" not in self.title:
+            errors.append(f"Phase 0 should be titled 'Foundation', got '{self.title}' (warning)")
+
+        # Validate has at least one task
+        if len(self.tasks) == 0:
+            errors.append(f"Phase '{self.id}' must have at least one task")
+
+        # Validate all tasks
+        for task in self.tasks:
+            task_errors = task.validate()
+            errors.extend([f"Task {task.id}: {error}" for error in task_errors])
+
+        return errors
+
+    def is_valid(self) -> bool:
+        """Check if the phase is valid.
+
+        Returns:
+            True if valid (no validation errors), False otherwise.
         """
         return len(self.validate()) == 0

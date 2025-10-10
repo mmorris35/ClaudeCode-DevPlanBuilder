@@ -1,6 +1,6 @@
 """Tests for data models."""
 
-from claude_planner.models import ProjectBrief
+from claude_planner.models import Phase, ProjectBrief, Subtask, Task
 
 
 class TestProjectBrief:
@@ -248,3 +248,288 @@ class TestProjectBrief:
 
         assert len(brief.performance_requirements) == 2
         assert brief.performance_requirements["latency"] == "<100ms"
+
+
+class TestSubtask:
+    """Tests for the Subtask dataclass."""
+
+    def test_create_minimal_subtask(self) -> None:
+        """Test creating a Subtask with minimal fields."""
+        subtask = Subtask(
+            id="1.1.1",
+            title="Create models (Single Session)",
+            deliverables=["Create file", "Add tests", "Write docs"],
+        )
+
+        assert subtask.id == "1.1.1"
+        assert subtask.title == "Create models (Single Session)"
+        assert len(subtask.deliverables) == 3
+        assert subtask.status == "pending"
+
+    def test_create_full_subtask(self) -> None:
+        """Test creating a Subtask with all fields."""
+        subtask = Subtask(
+            id="2.3.4",
+            title="Implement parser (Single Session)",
+            deliverables=["Parse file", "Extract data", "Validate", "Add tests"],
+            prerequisites=["1.1.1", "1.1.2"],
+            files_to_create=["parser.py", "test_parser.py"],
+            files_to_modify=["__init__.py"],
+            success_criteria=["Tests pass", "Coverage >80%"],
+            technology_decisions=["Use regex", "Use PyYAML"],
+            status="completed",
+            completion_notes={"implementation": "Done", "tests": "12 tests"},
+        )
+
+        assert len(subtask.deliverables) == 4
+        assert len(subtask.prerequisites) == 2
+        assert subtask.status == "completed"
+
+    def test_validate_valid_subtask(self) -> None:
+        """Test validation passes for a valid subtask."""
+        subtask = Subtask(
+            id="1.1.1",
+            title="Create models (Single Session)",
+            deliverables=["Item 1", "Item 2", "Item 3"],
+        )
+
+        errors = subtask.validate()
+        assert errors == []
+        assert subtask.is_valid() is True
+
+    def test_validate_invalid_id_format(self) -> None:
+        """Test validation fails for invalid ID format."""
+        subtask = Subtask(
+            id="invalid",
+            title="Test (Single Session)",
+            deliverables=["Item 1", "Item 2", "Item 3"],
+        )
+
+        errors = subtask.validate()
+        assert any("format X.Y.Z" in error for error in errors)
+        assert subtask.is_valid() is False
+
+    def test_validate_missing_single_session_suffix(self) -> None:
+        """Test validation fails when title is missing (Single Session) suffix."""
+        subtask = Subtask(
+            id="1.1.1", title="Create models", deliverables=["Item 1", "Item 2", "Item 3"]
+        )
+
+        errors = subtask.validate()
+        assert any("(Single Session)" in error for error in errors)
+        assert subtask.is_valid() is False
+
+    def test_validate_too_few_deliverables(self) -> None:
+        """Test validation fails when there are too few deliverables."""
+        subtask = Subtask(id="1.1.1", title="Test (Single Session)", deliverables=["Only one"])
+
+        errors = subtask.validate()
+        assert any("minimum is 3" in error for error in errors)
+        assert subtask.is_valid() is False
+
+    def test_validate_too_many_deliverables(self) -> None:
+        """Test validation fails when there are too many deliverables."""
+        subtask = Subtask(
+            id="1.1.1",
+            title="Test (Single Session)",
+            deliverables=["1", "2", "3", "4", "5", "6", "7", "8"],
+        )
+
+        errors = subtask.validate()
+        assert any("maximum is 7" in error for error in errors)
+        assert subtask.is_valid() is False
+
+    def test_validate_invalid_status(self) -> None:
+        """Test validation fails for invalid status."""
+        subtask = Subtask(
+            id="1.1.1",
+            title="Test (Single Session)",
+            deliverables=["Item 1", "Item 2", "Item 3"],
+            status="invalid_status",
+        )
+
+        errors = subtask.validate()
+        assert any("Status 'invalid_status'" in error for error in errors)
+        assert subtask.is_valid() is False
+
+
+class TestTask:
+    """Tests for the Task dataclass."""
+
+    def test_create_minimal_task(self) -> None:
+        """Test creating a Task with minimal fields."""
+        task = Task(id="1.1", title="Setup Project")
+
+        assert task.id == "1.1"
+        assert task.title == "Setup Project"
+        assert task.description == ""
+        assert len(task.subtasks) == 0
+
+    def test_create_task_with_subtasks(self) -> None:
+        """Test creating a Task with subtasks."""
+        task = Task(id="1.1", title="Setup", description="Setup the project")
+        task.subtasks.append(
+            Subtask(
+                id="1.1.1",
+                title="Init (Single Session)",
+                deliverables=["Item 1", "Item 2", "Item 3"],
+            )
+        )
+        task.subtasks.append(
+            Subtask(
+                id="1.1.2",
+                title="Config (Single Session)",
+                deliverables=["Item 1", "Item 2", "Item 3"],
+            )
+        )
+
+        assert len(task.subtasks) == 2
+        assert task.subtasks[0].id == "1.1.1"
+
+    def test_validate_valid_task(self) -> None:
+        """Test validation passes for a valid task."""
+        task = Task(id="1.1", title="Setup")
+        task.subtasks.append(
+            Subtask(
+                id="1.1.1",
+                title="Init (Single Session)",
+                deliverables=["Item 1", "Item 2", "Item 3"],
+            )
+        )
+
+        errors = task.validate()
+        assert errors == []
+        assert task.is_valid() is True
+
+    def test_validate_invalid_id_format(self) -> None:
+        """Test validation fails for invalid ID format."""
+        task = Task(id="invalid", title="Test")
+        task.subtasks.append(
+            Subtask(
+                id="1.1.1",
+                title="Test (Single Session)",
+                deliverables=["Item 1", "Item 2", "Item 3"],
+            )
+        )
+
+        errors = task.validate()
+        assert any("format X.Y" in error for error in errors)
+        assert task.is_valid() is False
+
+    def test_validate_no_subtasks(self) -> None:
+        """Test validation fails when task has no subtasks."""
+        task = Task(id="1.1", title="Test")
+
+        errors = task.validate()
+        assert any("at least one subtask" in error for error in errors)
+        assert task.is_valid() is False
+
+    def test_validate_propagates_subtask_errors(self) -> None:
+        """Test validation includes errors from subtasks."""
+        task = Task(id="1.1", title="Test")
+        task.subtasks.append(Subtask(id="invalid", title="Bad", deliverables=["Only one"]))
+
+        errors = task.validate()
+        assert len(errors) > 1  # Multiple errors from invalid subtask
+        assert task.is_valid() is False
+
+
+class TestPhase:
+    """Tests for the Phase dataclass."""
+
+    def test_create_minimal_phase(self) -> None:
+        """Test creating a Phase with minimal fields."""
+        phase = Phase(id="0", title="Foundation", goal="Setup project")
+
+        assert phase.id == "0"
+        assert phase.title == "Foundation"
+        assert phase.goal == "Setup project"
+        assert phase.days == ""
+        assert len(phase.tasks) == 0
+
+    def test_create_phase_with_tasks(self) -> None:
+        """Test creating a Phase with tasks."""
+        phase = Phase(id="1", title="Development", goal="Build features", days="3-5")
+        task = Task(id="1.1", title="Feature 1")
+        task.subtasks.append(
+            Subtask(
+                id="1.1.1",
+                title="Implement (Single Session)",
+                deliverables=["Item 1", "Item 2", "Item 3"],
+            )
+        )
+        phase.tasks.append(task)
+
+        assert len(phase.tasks) == 1
+        assert phase.tasks[0].id == "1.1"
+        assert phase.days == "3-5"
+
+    def test_validate_valid_phase(self) -> None:
+        """Test validation passes for a valid phase."""
+        phase = Phase(id="0", title="Foundation", goal="Setup")
+        task = Task(id="0.1", title="Init")
+        task.subtasks.append(
+            Subtask(
+                id="0.1.1",
+                title="Setup (Single Session)",
+                deliverables=["Item 1", "Item 2", "Item 3"],
+            )
+        )
+        phase.tasks.append(task)
+
+        errors = phase.validate()
+        assert errors == []
+        assert phase.is_valid() is True
+
+    def test_validate_invalid_id(self) -> None:
+        """Test validation fails for non-numeric ID."""
+        phase = Phase(id="X", title="Test", goal="Test goal")
+        task = Task(id="X.1", title="Task")
+        task.subtasks.append(
+            Subtask(
+                id="X.1.1",
+                title="Sub (Single Session)",
+                deliverables=["Item 1", "Item 2", "Item 3"],
+            )
+        )
+        phase.tasks.append(task)
+
+        errors = phase.validate()
+        assert any("must be a number" in error for error in errors)
+        assert phase.is_valid() is False
+
+    def test_validate_phase_zero_not_foundation(self) -> None:
+        """Test validation warns when Phase 0 is not titled Foundation."""
+        phase = Phase(id="0", title="Setup", goal="Setup project")
+        task = Task(id="0.1", title="Task")
+        task.subtasks.append(
+            Subtask(
+                id="0.1.1",
+                title="Sub (Single Session)",
+                deliverables=["Item 1", "Item 2", "Item 3"],
+            )
+        )
+        phase.tasks.append(task)
+
+        errors = phase.validate()
+        assert any("Foundation" in error and "warning" in error for error in errors)
+        assert phase.is_valid() is False
+
+    def test_validate_no_tasks(self) -> None:
+        """Test validation fails when phase has no tasks."""
+        phase = Phase(id="1", title="Test", goal="Test goal")
+
+        errors = phase.validate()
+        assert any("at least one task" in error for error in errors)
+        assert phase.is_valid() is False
+
+    def test_validate_propagates_task_errors(self) -> None:
+        """Test validation includes errors from tasks."""
+        phase = Phase(id="1", title="Test", goal="Test goal")
+        task = Task(id="invalid", title="Bad")
+        task.subtasks.append(Subtask(id="bad", title="Bad", deliverables=["Only one"]))
+        phase.tasks.append(task)
+
+        errors = phase.validate()
+        assert len(errors) > 1  # Multiple errors from invalid task/subtasks
+        assert phase.is_valid() is False
