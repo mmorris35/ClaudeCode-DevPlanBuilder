@@ -382,3 +382,109 @@ class Phase:
             True if valid (no validation errors), False otherwise.
         """
         return len(self.validate()) == 0
+
+
+@dataclass
+class TechStack:
+    """Represents the technology stack for a project.
+
+    This dataclass holds technology choices for different aspects of a project,
+    including languages, frameworks, databases, and tools.
+
+    Attributes:
+        language: Primary programming language
+        framework: Main framework (e.g., "Flask", "FastAPI", "React")
+        database: Database choice (e.g., "PostgreSQL", "MongoDB")
+        testing: Testing framework (e.g., "pytest", "Jest")
+        linting: Linting tool (e.g., "ruff", "eslint")
+        type_checking: Type checking tool (e.g., "mypy", "TypeScript")
+        deployment: Deployment target (e.g., "AWS", "Heroku")
+        ci_cd: CI/CD platform (e.g., "GitHub Actions", "GitLab CI")
+        additional_tools: Dictionary of additional tools/libraries
+
+    Example:
+        >>> stack = TechStack(
+        ...     language="Python 3.11",
+        ...     framework="FastAPI",
+        ...     database="PostgreSQL"
+        ... )
+        >>> print(stack.language)
+        Python 3.11
+    """
+
+    language: str
+    framework: str = ""
+    database: str = ""
+    testing: str = ""
+    linting: str = ""
+    type_checking: str = ""
+    deployment: str = ""
+    ci_cd: str = ""
+    additional_tools: dict[str, str] = field(default_factory=dict)
+
+    def validate(self) -> list[str]:
+        """Validate the TechStack has required fields.
+
+        Returns:
+            List of validation error messages. Empty list if valid.
+
+        Example:
+            >>> stack = TechStack(language="")
+            >>> errors = stack.validate()
+            >>> len(errors) > 0
+            True
+        """
+        errors = []
+
+        # Language is required
+        if not self.language or not self.language.strip():
+            errors.append("language is required and cannot be empty")
+
+        return errors
+
+    def is_valid(self) -> bool:
+        """Check if the TechStack is valid.
+
+        Returns:
+            True if valid (no validation errors), False otherwise.
+
+        Example:
+            >>> stack = TechStack(language="Python 3.11")
+            >>> stack.is_valid()
+            True
+        """
+        return len(self.validate()) == 0
+
+    def to_dict(self) -> dict[str, str]:
+        """Convert TechStack to a dictionary for template rendering.
+
+        Returns:
+            Dictionary with all non-empty technology choices.
+
+        Example:
+            >>> stack = TechStack(language="Python", framework="Flask")
+            >>> d = stack.to_dict()
+            >>> d["language"]
+            'Python'
+        """
+        result = {"language": self.language}
+
+        if self.framework:
+            result["framework"] = self.framework
+        if self.database:
+            result["database"] = self.database
+        if self.testing:
+            result["testing"] = self.testing
+        if self.linting:
+            result["linting"] = self.linting
+        if self.type_checking:
+            result["type_checking"] = self.type_checking
+        if self.deployment:
+            result["deployment"] = self.deployment
+        if self.ci_cd:
+            result["ci_cd"] = self.ci_cd
+
+        # Add additional tools
+        result.update(self.additional_tools)
+
+        return result

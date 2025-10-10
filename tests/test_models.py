@@ -1,6 +1,6 @@
 """Tests for data models."""
 
-from claude_planner.models import Phase, ProjectBrief, Subtask, Task
+from claude_planner.models import Phase, ProjectBrief, Subtask, Task, TechStack
 
 
 class TestProjectBrief:
@@ -533,3 +533,141 @@ class TestPhase:
         errors = phase.validate()
         assert len(errors) > 1  # Multiple errors from invalid task/subtasks
         assert phase.is_valid() is False
+
+
+class TestTechStack:
+    """Tests for the TechStack dataclass."""
+
+    def test_create_minimal_tech_stack(self) -> None:
+        """Test creating a TechStack with only language."""
+        stack = TechStack(language="Python 3.11")
+
+        assert stack.language == "Python 3.11"
+        assert stack.framework == ""
+        assert stack.database == ""
+        assert stack.testing == ""
+        assert stack.linting == ""
+        assert stack.type_checking == ""
+        assert stack.deployment == ""
+        assert stack.ci_cd == ""
+        assert stack.additional_tools == {}
+
+    def test_create_full_tech_stack(self) -> None:
+        """Test creating a TechStack with all fields."""
+        stack = TechStack(
+            language="Python 3.11",
+            framework="FastAPI",
+            database="PostgreSQL",
+            testing="pytest",
+            linting="ruff",
+            type_checking="mypy",
+            deployment="AWS",
+            ci_cd="GitHub Actions",
+            additional_tools={"orm": "SQLAlchemy", "migrations": "Alembic"},
+        )
+
+        assert stack.language == "Python 3.11"
+        assert stack.framework == "FastAPI"
+        assert stack.database == "PostgreSQL"
+        assert stack.testing == "pytest"
+        assert stack.linting == "ruff"
+        assert stack.type_checking == "mypy"
+        assert stack.deployment == "AWS"
+        assert stack.ci_cd == "GitHub Actions"
+        assert len(stack.additional_tools) == 2
+        assert stack.additional_tools["orm"] == "SQLAlchemy"
+
+    def test_validate_valid_tech_stack(self) -> None:
+        """Test validation passes for a valid tech stack."""
+        stack = TechStack(language="Python 3.11")
+
+        errors = stack.validate()
+        assert errors == []
+        assert stack.is_valid() is True
+
+    def test_validate_missing_language(self) -> None:
+        """Test validation fails when language is missing."""
+        stack = TechStack(language="")
+
+        errors = stack.validate()
+        assert len(errors) == 1
+        assert "language" in errors[0]
+        assert stack.is_valid() is False
+
+    def test_validate_whitespace_only_language(self) -> None:
+        """Test validation fails for whitespace-only language."""
+        stack = TechStack(language="   ")
+
+        errors = stack.validate()
+        assert len(errors) == 1
+        assert "language" in errors[0]
+        assert stack.is_valid() is False
+
+    def test_to_dict_minimal(self) -> None:
+        """Test to_dict with minimal tech stack."""
+        stack = TechStack(language="Python 3.11")
+
+        result = stack.to_dict()
+
+        assert result == {"language": "Python 3.11"}
+
+    def test_to_dict_partial(self) -> None:
+        """Test to_dict with some fields populated."""
+        stack = TechStack(language="Python 3.11", framework="Flask", testing="pytest")
+
+        result = stack.to_dict()
+
+        assert result["language"] == "Python 3.11"
+        assert result["framework"] == "Flask"
+        assert result["testing"] == "pytest"
+        assert "database" not in result  # Empty fields excluded
+        assert "linting" not in result
+
+    def test_to_dict_full(self) -> None:
+        """Test to_dict with all fields populated."""
+        stack = TechStack(
+            language="Python 3.11",
+            framework="FastAPI",
+            database="PostgreSQL",
+            testing="pytest",
+            linting="ruff",
+            type_checking="mypy",
+            deployment="AWS",
+            ci_cd="GitHub Actions",
+        )
+
+        result = stack.to_dict()
+
+        assert result["language"] == "Python 3.11"
+        assert result["framework"] == "FastAPI"
+        assert result["database"] == "PostgreSQL"
+        assert result["testing"] == "pytest"
+        assert result["linting"] == "ruff"
+        assert result["type_checking"] == "mypy"
+        assert result["deployment"] == "AWS"
+        assert result["ci_cd"] == "GitHub Actions"
+
+    def test_to_dict_with_additional_tools(self) -> None:
+        """Test to_dict includes additional tools."""
+        stack = TechStack(
+            language="Python 3.11",
+            framework="Django",
+            additional_tools={"orm": "Django ORM", "cache": "Redis"},
+        )
+
+        result = stack.to_dict()
+
+        assert result["language"] == "Python 3.11"
+        assert result["framework"] == "Django"
+        assert result["orm"] == "Django ORM"
+        assert result["cache"] == "Redis"
+
+    def test_additional_tools_mutable(self) -> None:
+        """Test that additional_tools can be modified after creation."""
+        stack = TechStack(language="Python 3.11")
+
+        stack.additional_tools["cache"] = "Redis"
+        stack.additional_tools["queue"] = "Celery"
+
+        assert len(stack.additional_tools) == 2
+        assert stack.additional_tools["cache"] == "Redis"
