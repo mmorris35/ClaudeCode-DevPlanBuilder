@@ -47,15 +47,23 @@ please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for cont
 {% for phase in phases %}
 ### Phase {{ phase.id }}: {{ phase.title }}{% if phase.timeline %} ({{ phase.timeline }}){% endif %}
 
+{% if phase.tasks -%}
 {% for task in phase.tasks -%}
 {% for subtask in task.subtasks -%}
 - [{{ 'x' if subtask.status == 'complete' else ' ' }}] {{ subtask.id }}: {{ subtask.title }}
 {% endfor %}
 {%- endfor %}
+{%- else -%}
+{# Tasks to be populated by Claude Code based on project requirements #}
+{% endif %}
 {% endfor %}
 
+{% if current_phase -%}
 **Current**: Phase {{ current_phase }}
+{% endif -%}
+{% if next_subtask -%}
 **Next**: {{ next_subtask }}
+{% endif %}
 
 ---
 
@@ -64,9 +72,15 @@ please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for cont
 
 **Goal**: {{ phase.goal }}
 
+{% if phase.description -%}
+{{ phase.description }}
+
+{% endif -%}
 {% if phase.prerequisites -%}
 **Prerequisites**: {{ phase.prerequisites }}
-{% endif %}
+
+{% endif -%}
+{% if phase.tasks -%}
 {% for task in phase.tasks %}
 ---
 
@@ -149,6 +163,20 @@ please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for cont
 ---
 {% endfor %}
 {% endfor %}
+{%- else -%}
+
+---
+
+**Tasks and subtasks for this phase will be populated by Claude Code based on:**
+- Project requirements from PROJECT_BRIEF.md
+- Key features identified: {{ key_features | join(', ') if key_features else 'to be determined' }}
+- Technical constraints and must-use technologies
+
+**To populate this phase**: Use Claude Code with the generate command, or manually break down
+the phase goal into tasks and subtasks following the structure in claude.md.
+
+---
+{% endif %}
 {% endfor %}
 
 {% if success_metrics %}

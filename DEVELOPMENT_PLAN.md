@@ -1714,6 +1714,97 @@ dev = [
 
 ---
 
+**Phase 3 Revision** (Post-4.2.1):
+After completing Phase 4 (Plan Generator), we identified that the "minimal generator" philosophy
+(don't force algorithmic decisions) requires Phase 3 templates to handle empty task/subtask lists
+gracefully. Updated plan.md.j2 template to render helpful instructions when phases have empty task
+lists, added test coverage, and clarified Phase 6 validation modes (basic vs strict). Also added
+Phase 4.5 placeholder for future Claude API enhancement (v2).
+
+**Changes**:
+- Modified `claude_planner/templates/base/plan.md.j2` to handle empty task lists with instructional
+  messages
+- Added test `test_render_plan_with_empty_task_lists()` to verify empty list handling
+- Updated Phase 6 validation requirements to support basic (lenient) and strict modes
+- Added Phase 4.5 (Plan Enhancement with Claude API) as deferred v2 feature
+- All tests pass (16 renderer tests, 90% coverage), linting clean, type checking clean
+
+---
+
+## Phase 4.5: Plan Enhancement with Claude API (v2 - Future)
+
+**Goal**: Optional Claude API integration to intelligently populate tasks/subtasks
+
+**Timeline**: TBD (Post-MVP)
+
+**Prerequisites**: Phase 4 complete (Plan Generator)
+
+**Status**: ⏸️ DEFERRED TO v2
+
+**Overview**:
+In MVP (Phase 4), generators create minimal structures (empty task/subtask lists). This phase
+adds an optional enhancement layer that uses Claude API to intelligently populate those empty
+structures based on project requirements.
+
+**Architecture**:
+```
+ProjectBrief → Generator (minimal) → Enhancer (Claude API) → Renderer → Files
+                                            ↓
+                                    Intelligently populates:
+                                    - Tasks for each phase
+                                    - Subtasks for each task
+                                    - Dependencies
+                                    - Timeline distribution
+```
+
+**Key Features**:
+- CLI flag: `--enhance` or `--use-api` to enable enhancement
+- Calls Claude API with: ProjectBrief + minimal plan + "populate intelligently"
+- Returns fully populated DevelopmentPlan
+- Respects must_use/cannot_use constraints
+- Leverages Claude's understanding of software development patterns
+
+**Why Deferred**:
+- MVP works without API (basic generation <5 seconds, offline)
+- Keeps MVP simple and free to use
+- Allows dogfooding and iteration before adding AI enhancement
+- API integration adds complexity (auth, rate limits, costs)
+
+**Future Implementation** (when ready for v2):
+
+### Task 4.5.1: API Enhancement Module
+
+**Subtask 4.5.1.1: Claude API Client (Single Session)**
+
+**Prerequisites**:
+- [ ] 4.2.1: Complete Plan Generator complete
+- [ ] Claude API key available
+
+**Deliverables**:
+- [ ] Create `claude_planner/enhancer/api_client.py`
+- [ ] Implement `call_claude_api()` with error handling
+- [ ] Support environment variable for API key
+- [ ] Add retry logic for rate limits
+- [ ] Create comprehensive tests (mock API)
+- [ ] Achieve >80% test coverage
+
+**Subtask 4.5.1.2: Plan Populator (Single Session)**
+
+**Prerequisites**:
+- [ ] 4.5.1.1: Claude API Client
+
+**Deliverables**:
+- [ ] Create `claude_planner/enhancer/populator.py`
+- [ ] Implement `enhance_plan()` - Populate empty tasks/subtasks
+- [ ] Generate intelligent task breakdowns per phase
+- [ ] Generate subtasks with proper sizing (2-4 hours)
+- [ ] Respect constraints (must_use/cannot_use)
+- [ ] Add CLI integration: `--enhance` flag
+- [ ] Create comprehensive tests
+- [ ] Achieve >80% test coverage
+
+---
+
 ## Phase 5: CLI Commands (Week 2, Days 2-3)
 
 **Goal**: Implement Click-based CLI with generate, validate, list-templates commands
@@ -1952,6 +2043,11 @@ dev = [
 
 **Prerequisites**: Phase 5 complete (CLI Commands)
 
+**Important Note**: Validation supports two modes:
+- **Basic Mode** (MVP): Validates structure of minimal plans (empty tasks/subtasks OK)
+- **Strict Mode** (v2): Validates fully populated plans (requires tasks/subtasks)
+For MVP, validation is lenient and provides warnings rather than errors for empty sections
+
 ---
 
 ### Task 6.1: Validation Rules
@@ -2052,27 +2148,31 @@ dev = [
 **Deliverables**:
 - [ ] Create `claude_planner/validator/plan_validator.py`
 - [ ] Implement `validate_plan()` - Check entire plan
-- [ ] Check: All phases have tasks
-- [ ] Check: All tasks have subtasks
-- [ ] Check: No circular dependencies
-- [ ] Check: Timeline is realistic
+- [ ] Check: All phases have tasks (WARNING in basic mode, ERROR in strict mode)
+- [ ] Check: All tasks have subtasks (WARNING in basic mode, ERROR in strict mode)
+- [ ] Check: No circular dependencies (always ERROR)
+- [ ] Check: Timeline is realistic (always WARNING/ERROR)
+- [ ] Support validation modes: basic (MVP) vs strict (v2)
 - [ ] Create comprehensive tests
 - [ ] Achieve >80% test coverage
 
 **Technology Decisions**:
 - Aggregate subtask validation results
-- Check plan-level constraints
+- Check plan-level constraints with configurable severity
 - Use DFS for circular dependency check
+- Basic mode: lenient (warnings for empty), Strict mode: enforcing (errors for empty)
 
 **Files to Create**:
 - `claude_planner/validator/plan_validator.py` - Plan validation
 - `tests/test_plan_validator.py` - Plan validator tests
 
 **Success Criteria**:
-- [ ] Validates all phases non-empty
-- [ ] Validates all tasks non-empty
-- [ ] Detects circular dependencies
+- [ ] Validates all phases exist (always required)
+- [ ] Validates tasks presence (WARNING in basic, ERROR in strict)
+- [ ] Validates subtasks presence (WARNING in basic, ERROR in strict)
+- [ ] Detects circular dependencies (always ERROR)
 - [ ] Checks timeline realistic (not 0 days, not 1000 days)
+- [ ] Supports --mode flag (basic/strict)
 - [ ] All tests pass
 - [ ] >80% test coverage
 

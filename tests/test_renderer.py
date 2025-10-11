@@ -518,3 +518,58 @@ class TestRenderAll:
         assert "QA Engineers" in plan_content
         assert "3 weeks" in plan_content
         assert "## Phase 0: Setup" in plan_content
+
+    def test_render_plan_with_empty_task_lists(self, tmp_path: Path) -> None:
+        """Test rendering plan with phases that have empty task lists.
+
+        This tests the "minimal generator" pattern where phases are created
+        but tasks/subtasks are left empty to be populated by Claude Code.
+        """
+        output_path = tmp_path / "DEVELOPMENT_PLAN.md"
+
+        render_plan_md(
+            "base",
+            output_path,
+            project_name="Minimal Plan",
+            goal="Test minimal plan generation",
+            target_users="Developers",
+            timeline="2 weeks",
+            tech_stack={"Language": "Python 3.11+"},
+            key_features=["User auth", "Data storage", "API endpoints"],
+            phases=[
+                {
+                    "id": "0",
+                    "title": "Foundation",
+                    "goal": "Setup project infrastructure",
+                    "description": "Initialize repository and development environment",
+                    "tasks": [],  # Empty task list - to be populated by Claude Code
+                },
+                {
+                    "id": "1",
+                    "title": "Core Features",
+                    "goal": "Implement main functionality",
+                    "description": "Build core features",
+                    "tasks": [],  # Empty task list
+                },
+            ],
+        )
+
+        assert output_path.exists()
+        content = output_path.read_text(encoding="utf-8")
+
+        # Verify phase headers exist
+        assert "## Phase 0: Foundation" in content
+        assert "## Phase 1: Core Features" in content
+
+        # Verify phase goals exist
+        assert "Setup project infrastructure" in content
+        assert "Implement main functionality" in content
+
+        # Verify instructional message for empty phases
+        assert "Tasks and subtasks for this phase will be populated" in content
+        assert "Claude Code" in content
+        assert "User auth, Data storage, API endpoints" in content
+
+        # Verify no task/subtask structure appears (since lists are empty)
+        assert "### Task" not in content
+        assert "**Subtask" not in content
