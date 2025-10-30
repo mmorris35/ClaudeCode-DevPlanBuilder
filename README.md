@@ -204,20 +204,62 @@ We've completed Phase [X]. Before moving to Phase [Y], please review all complet
 This is **both**:
 
 1. **A methodology** for building development plans with Claude Code
-2. **A working CLI tool** (in development) that automates the plan generation
+   ✅ **READY TO USE** - The prompt sequences and examples are complete and battle-tested
 
-The tool is being built using its own generated development plan - meta! 🎉
+2. **A working CLI tool** (in active development) that automates the plan generation
+   🚧 **IN PROGRESS** - Currently at Phase 5 (CLI Commands)
 
-### Current Status
+The tool is being built using its own generated development plan - eating our own dog food! 🎉
 
-🚧 **In Development** - Following subtask 5.1.1 (CLI Entry Point)
+### Development Roadmap
 
-The CLI tool will eventually let you run:
-```bash
-claude-planner generate my-project --brief PROJECT_BRIEF.md
-```
+**The CLI Tool Progress:**
 
-But right now, you can use the **methodology** (the prompts in PROMPT_SEQUENCE.md) to build dev plans for any project!
+| Phase | Status | Description |
+|-------|--------|-------------|
+| **Phase 0: Foundation** | ✅ **COMPLETE** | Repo setup, package structure, pre-commit hooks, CI/CD pipeline |
+| **Phase 1: Data Models** | ✅ **COMPLETE** | ProjectBrief, Phase/Task/Subtask models, TechStack, validation |
+| **Phase 2: Parser** | ✅ **COMPLETE** | Markdown parser, field extractor, ProjectBrief converter |
+| **Phase 3: Templates** | ✅ **COMPLETE** | Template selector, Jinja2 renderer, Web App/API/CLI templates |
+| **Phase 4: Generators** | ✅ **COMPLETE** | Tech stack, phase, task, subtask generators + integration |
+| **Phase 5: CLI Commands** | 🚧 **IN PROGRESS** | CLI entry point complete, working on generate/validate/list commands |
+| **Phase 6: Validation** | ⏳ **PLANNED** | Validation rules engine, subtask/plan validators, reporting |
+| **Phase 7: Git Integration** | ⏳ **PLANNED** | Repository initialization, initial commit creation |
+| **Phase 8: Testing & Docs** | ⏳ **PLANNED** | Integration tests, end-to-end tests, comprehensive documentation |
+| **Phase 9: Distribution** | ⏳ **PLANNED** | Package configuration, PyPI publishing |
+| **Phase 10: Dogfooding** | ⏳ **PLANNED** | Generate example plans, iterate based on real usage |
+
+**Currently Working On:** Subtask 5.1.1 - CLI Entry Point ✅ Complete!
+**Next Up:** Subtask 5.1.2 - Generate Command (integrates parser + generator + renderer)
+
+### What Works Right Now
+
+✅ **The Methodology** - Use PROMPT_SEQUENCE.md to build dev plans for ANY project
+✅ **Data Models** - Complete ProjectBrief and DevelopmentPlan structures
+✅ **Parser** - Extract requirements from PROJECT_BRIEF.md
+✅ **Templates** - Jinja2 templates for claude.md and DEVELOPMENT_PLAN.md
+✅ **Generators** - Create minimal structures (tech stack, phases, tasks, subtasks)
+✅ **CLI Framework** - Basic `claude-planner` command with --help, --version, --verbose
+
+### What's Coming
+
+🚧 **Generate Command** - `claude-planner generate my-project --brief PROJECT_BRIEF.md`
+🚧 **Validate Command** - `claude-planner validate DEVELOPMENT_PLAN.md`
+🚧 **List Templates** - `claude-planner list-templates`
+🚧 **Git Integration** - Automatic repository initialization
+🚧 **Full Validation** - Quality checks and error reporting
+
+### How to Use It Today
+
+**Option 1: Use the Methodology** (✅ Ready Now)
+- Follow [PROMPT_SEQUENCE.md](PROMPT_SEQUENCE.md)
+- Let Claude Code guide you through building your development plan
+- Works for any project, any tech stack
+
+**Option 2: Wait for the CLI Tool** (🚧 Coming Soon)
+- The automated tool will make it even easier
+- Watch this repo for updates
+- Expected completion: Following the development plan phases above
 
 ---
 
