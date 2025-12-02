@@ -4,6 +4,33 @@
 
 ---
 
+## ⚠️ CRITICAL: Git Workflow is at the TASK Level
+
+**READ THIS FIRST**: The git branching strategy operates at the **TASK** level, NOT the subtask level!
+
+```
+CORRECT:
+  Task 1.2: User Authentication
+  ├── Create branch: feature/1-2-user-auth
+  ├── Subtask 1.2.1 → commit to feature/1-2-user-auth
+  ├── Subtask 1.2.2 → commit to feature/1-2-user-auth
+  ├── Subtask 1.2.3 → commit to feature/1-2-user-auth
+  └── Task complete → squash merge to main
+
+WRONG:
+  ❌ Subtask 1.2.1 → create branch feature/1-2-1-models
+  ❌ Subtask 1.2.2 → create branch feature/1-2-2-routes
+  ❌ Subtask 1.2.3 → create branch feature/1-2-3-tests
+```
+
+**Key rules:**
+- **ONE branch per TASK** (e.g., `feature/1-2-user-auth`)
+- **Multiple commits** to that branch (one per subtask)
+- **Squash merge to main** when the entire TASK is complete
+- **Do NOT create branches for individual subtasks**
+
+---
+
 ## Prerequisites
 
 Before starting, you need:
@@ -154,6 +181,16 @@ Each phase should have:
    Each phase contains multiple tasks.
    Each task contains 2-6 subtasks.
 
+   Each task MUST have:
+   - ID (X.Y format: Phase.Task)
+   - Title (short, descriptive)
+   - Goal (what this task accomplishes)
+   - **Git Strategy** with:
+     - Branch name (e.g., `feature/1-2-user-auth`)
+     - Branch from (usually `main`)
+     - Commit prefix (`feat`, `fix`, `refactor`, `test`, `docs`, `chore`)
+     - Merge strategy (`squash`, `merge`, or `rebase`)
+
    Each subtask MUST have:
    - ID (X.Y.Z format: Phase.Task.Subtask)
    - Title ending with "(Single Session)"
@@ -172,6 +209,13 @@ IMPORTANT RULES:
 - Phase 0 must always be "Foundation"
 - Use semantic versioning for subtask IDs (0.1.1, 0.1.2, etc.)
 - Include "---" dividers between subtasks for readability
+
+**GIT WORKFLOW (CRITICAL)**:
+- Git Strategy is defined at the TASK level, NOT subtask level
+- ONE feature branch per TASK (e.g., `feature/1-2-user-auth`)
+- Each subtask COMMITS to the task's branch (does NOT create a new branch)
+- Squash merge to main when the ENTIRE TASK is complete
+- Do NOT create branches for individual subtasks!
 
 Please create the complete DEVELOPMENT_PLAN.md structure with all phases, tasks, and subtasks for my project.
 ```
@@ -215,7 +259,9 @@ VALIDATION CHECKLIST:
    - [ ] Technology decisions are clear
 
 5. **Git Discipline**
-   - [ ] Each subtask ends with a commit
+   - [ ] Each task has a Git Strategy (branch name, commit prefix, merge strategy)
+   - [ ] Branch names follow pattern: `feature/X-Y-description`
+   - [ ] Each subtask ends with a commit to the task branch
    - [ ] Pre-commit hooks are set up early (Phase 0)
    - [ ] CI/CD pipeline is configured early
 
@@ -407,6 +453,31 @@ Create a pre-release report with any blockers.
 
 ## Git Strategy Prompts
 
+### Git Strategy Per Task
+
+Every task in DEVELOPMENT_PLAN.md should include a Git Strategy section:
+
+```markdown
+### Task 1.2: User Authentication
+
+**Goal**: Implement user login and registration
+
+**Git Strategy**:
+- **Branch**: `feature/1-2-user-auth` (from `main`)
+- **Commit Prefix**: `feat`
+- **Merge**: squash when task complete
+
+**Subtask 1.2.1: Create Auth Models (Single Session)**
+...
+```
+
+**Workflow per task:**
+1. Start task → Create branch (`feature/X-Y-description`)
+2. Complete Subtask X.Y.1 → Commit to branch
+3. Complete Subtask X.Y.2 → Commit to branch
+4. Complete Subtask X.Y.N → Commit to branch
+5. Task complete → Squash merge to main
+
 ### Setting Up Git Workflow
 
 Include in your Phase 0:
@@ -416,8 +487,7 @@ Set up git workflow with:
 
 1. **Branch Strategy**:
    - main (production-ready)
-   - develop (integration)
-   - feature/* (for each major feature)
+   - feature/* (one branch per task, e.g., feature/1-2-user-auth)
 
 2. **Commit Standards**:
    - Semantic prefixes: feat:, fix:, docs:, refactor:, test:, chore:
@@ -439,22 +509,24 @@ Set up git workflow with:
 Configure all of this in Phase 0.
 ```
 
-### For Each Major Feature Branch
+### Starting a New Task
+
+When beginning a task (not a subtask):
 
 ```
-Starting work on [FEATURE_NAME]. Please:
+Starting Task [X.Y: TITLE]. Please:
 
-1. Create feature branch: git checkout -b feature/[feature-name]
-2. List all subtasks for this feature
+1. Create task branch: git checkout -b feature/X-Y-short-description
+2. List all subtasks for this task
 3. Work through subtasks sequentially
-4. Commit after each subtask completion
-5. When feature complete, verify:
+4. Commit after each subtask completion with prefix from Git Strategy
+5. When task complete (all subtasks done), verify:
    - All tests pass
    - Coverage maintained
    - Documentation updated
-6. Merge back to develop
+6. Squash merge back to main
 
-Begin with the first subtask for this feature.
+Begin with subtask X.Y.1.
 ```
 
 ---

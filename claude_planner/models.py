@@ -161,11 +161,43 @@ class ProjectBrief:
 
 
 @dataclass
+class GitStrategy:
+    """Represents the git workflow strategy for a task.
+
+    Defines the branching and commit strategy to follow when working on a task.
+    All subtasks within the task share the same branch - each subtask commits
+    to the branch, and the branch is merged when the entire task is complete.
+
+    Attributes:
+        branch_name: Name of the branch to create for this task
+        branch_from: Which branch to create the new branch from (default: main)
+        commit_prefix: Semantic commit prefix (feat, fix, refactor, etc.)
+        merge_strategy: How to merge back (merge, squash, rebase)
+        pr_required: Whether a PR is required before merging
+
+    Example:
+        >>> git = GitStrategy(
+        ...     branch_name="feature/1-2-user-auth",
+        ...     commit_prefix="feat"
+        ... )
+        >>> print(git.branch_name)
+        feature/1-2-user-auth
+    """
+
+    branch_name: str
+    branch_from: str = "main"
+    commit_prefix: str = "feat"
+    merge_strategy: str = "squash"
+    pr_required: bool = False
+
+
+@dataclass
 class Subtask:
     """Represents a single subtask in a development plan.
 
     A subtask is a unit of work that should be completable in a single session.
     Each subtask has an ID, title, deliverables, prerequisites, and status.
+    Git strategy is inherited from the parent Task.
 
     Attributes:
         id: Subtask ID in format "X.Y.Z" (e.g., "1.2.3")
@@ -256,11 +288,14 @@ class Task:
     """Represents a task in a development plan.
 
     A task groups related subtasks together and belongs to a phase.
+    Each task has its own git strategy - all subtasks within the task
+    work on the same branch and commit to it.
 
     Attributes:
         id: Task ID in format "X.Y" (e.g., "1.2")
         title: Short descriptive title
         description: Longer description of the task
+        git_strategy: Git workflow strategy for this task
         subtasks: List of Subtask objects
 
     Example:
@@ -273,6 +308,7 @@ class Task:
     id: str
     title: str
     description: str = ""
+    git_strategy: GitStrategy | None = None
     subtasks: list[Subtask] = field(default_factory=list)
 
     def validate(self) -> list[str]:

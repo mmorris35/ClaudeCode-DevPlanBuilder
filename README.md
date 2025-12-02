@@ -48,7 +48,7 @@ Replace `[X.Y.Z]` with the next subtask number (like `0.1.1`, `1.2.3`, etc.)
 - Complete each subtask fully (2-4 hours of work)
 - Write comprehensive tests (>80% coverage)
 - Run linting and type checking
-- Create semantic git commits
+- Commit to the task's feature branch (NOT create a new branch per subtask)
 - Update progress in DEVELOPMENT_PLAN.md
 
 ---
@@ -62,11 +62,29 @@ Your development plan will have:
 3. **Single-session sizing** - Each subtask takes 2-4 hours max
 4. **Explicit prerequisites** - No guessing about order
 5. **Success criteria** - Objective verification of completion
-6. **Git commits built-in** - One commit per completed subtask
-7. **Testing throughout** - Not an afterthought, >80% coverage required
-8. **Quality gates** - Linting, type checking, validation at every step
-9. **Completion notes** - Knowledge capture for every subtask
-10. **One simple prompt** - Same format for every session
+6. **Git workflow at TASK level** - One feature branch per task (NOT per subtask!)
+7. **Commits per subtask** - Each subtask commits to the task's branch, squash merge when task complete
+8. **Testing throughout** - Not an afterthought, >80% coverage required
+9. **Quality gates** - Linting, type checking, validation at every step
+10. **Completion notes** - Knowledge capture for every subtask
+11. **One simple prompt** - Same format for every session
+
+### ⚠️ Git Workflow: TASK-Level Branching
+
+**IMPORTANT**: Branches are created at the **TASK** level, NOT the subtask level!
+
+```
+Task 1.2: User Authentication
+├── Branch: feature/1-2-user-auth (created once for the task)
+├── Subtask 1.2.1 → commit to branch
+├── Subtask 1.2.2 → commit to branch
+├── Subtask 1.2.3 → commit to branch
+└── Task complete → squash merge to main
+```
+
+- **One branch per task** (e.g., `feature/1-2-user-auth`)
+- **Multiple commits per task** (one for each subtask)
+- **Merge when task complete** (not after each subtask)
 
 ---
 
@@ -127,7 +145,10 @@ A complete roadmap with:
 - **Phase 1-N: Development** - Your features broken into digestible pieces
 - **Final Phase: Testing & Distribution** - Polish and release
 
-Each subtask includes:
+Each **task** includes:
+- **Git Strategy** - Branch name, commit prefix, merge strategy (one branch per task, all subtasks commit to it)
+
+Each **subtask** includes:
 - Exact deliverables (what to build)
 - Files to create/modify (where to build it)
 - Success criteria (how to verify it works)

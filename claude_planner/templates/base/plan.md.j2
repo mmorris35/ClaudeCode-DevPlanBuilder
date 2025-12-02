@@ -58,7 +58,7 @@ please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for cont
 {% endif %}
 {% endfor %}
 
-{% if current_phase -%}
+{% if current_phase is not none -%}
 **Current**: Phase {{ current_phase }}
 {% endif -%}
 {% if next_subtask -%}
@@ -88,7 +88,21 @@ please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for cont
 
 {% if task.goal -%}
 **Goal**: {{ task.goal }}
+
+{% endif -%}
+**Git Strategy** (for entire task, NOT per subtask):
+{% if task.git_strategy -%}
+- **Branch**: `{{ task.git_strategy.branch_name }}` (from `{{ task.git_strategy.branch_from }}`)
+- **Commit Prefix**: `{{ task.git_strategy.commit_prefix }}`
+- **Merge**: {{ task.git_strategy.merge_strategy }}{% if task.git_strategy.pr_required %} (PR required){% endif %}
+- All subtasks commit to this branch; merge only when task complete
+{%- else -%}
+- **Branch**: `feature/{{ task.id | replace('.', '-') }}-<short-description>` (create once for task)
+- **Commit Prefix**: `feat` (or `fix`, `refactor`, `test`, `docs` as appropriate)
+- **Merge**: squash when task complete (NOT after each subtask)
+- All subtasks commit to this branch
 {% endif %}
+
 {% for subtask in task.subtasks %}
 **Subtask {{ subtask.id }}: {{ subtask.title }}**
 
