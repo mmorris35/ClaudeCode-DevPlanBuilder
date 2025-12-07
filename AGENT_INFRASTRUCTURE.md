@@ -1,147 +1,145 @@
-Agent Infrastructure Documentation
-Version: 1.0 Last Updated: 2025-12-07 Project: Sequel Security Posture Assessor (whag-1)
+# Agent Infrastructure Documentation
+
+**Version:** 1.0
+**Last Updated:** 2025-12-07
+**Project:** Sequel Security Posture Assessor (whag-1)
 
 This document describes the custom agent system, NATS-based inter-agent communication, and persistent memory infrastructure used in this project. It provides everything needed to port this infrastructure to other projects.
 
-Quick Start
-Want to port this to your project in 10 minutes? Jump to Porting to a New Project.
+---
 
-Just want to understand how it works? Read Overview and Architecture.
+## Quick Start
 
-Having problems? See Troubleshooting.
+**Want to port this to your project in 10 minutes?** Jump to [Porting to a New Project](#porting-to-a-new-project).
 
-Table of Contents
-Overview
-Architecture
-Custom Agents
-NATS Messaging System
-Agent Memory MCP Server
-Setup Guide
-Porting to a New Project
-Troubleshooting
-Advanced Features
-Overview
-This project uses a multi-agent architecture where specialized AI agents collaborate via NATS messaging to complete complex development tasks. Each agent has a specific role (TDD coding, QA testing, DevOps deployment, documentation) and can communicate with other agents to request reviews, share results, and coordinate work.
+**Just want to understand how it works?** Read [Overview](#overview) and [Architecture](#architecture).
 
-Communication Layer
+**Having problems?** See [Troubleshooting](#troubleshooting).
 
-Agent Layer
+---
 
-MCP Protocol
+## Table of Contents
 
-MCP Protocol
+1. [Overview](#overview)
+2. [Architecture](#architecture)
+3. [Custom Agents](#custom-agents)
+4. [NATS Messaging System](#nats-messaging-system)
+5. [Agent Memory MCP Server](#agent-memory-mcp-server)
+6. [Setup Guide](#setup-guide)
+7. [Porting to a New Project](#porting-to-a-new-project)
+8. [Troubleshooting](#troubleshooting)
+9. [Advanced Features](#advanced-features)
 
-MCP Protocol
+---
 
-MCP Protocol
+## Overview
 
-MCP Protocol
+This project uses a **multi-agent architecture** where specialized AI agents collaborate via NATS messaging to complete complex development tasks. Each agent has a specific role (TDD coding, QA testing, DevOps deployment, documentation) and can communicate with other agents to request reviews, share results, and coordinate work.
 
-MCP Protocol
+```mermaid
+flowchart TB
+    subgraph "Agent Layer"
+        A1[tdd-coder]
+        A2[tdd-qa]
+        A3[qa-engineer]
+        A4[devops]
+        A5[docs-specialist]
+        A6[docs-qa]
+    end
 
-Publish/Subscribe
+    subgraph "Communication Layer"
+        MCP[Agent Memory<br/>MCP Server]
+        NATS[NATS Server<br/>JetStream]
+        DB[(SQLite<br/>Memory DB)]
+    end
 
-Store/Retrieve
+    A1 <-->|MCP Protocol| MCP
+    A2 <-->|MCP Protocol| MCP
+    A3 <-->|MCP Protocol| MCP
+    A4 <-->|MCP Protocol| MCP
+    A5 <-->|MCP Protocol| MCP
+    A6 <-->|MCP Protocol| MCP
 
-tdd-coder
+    MCP <-->|Publish/Subscribe| NATS
+    MCP <-->|Store/Retrieve| DB
 
-tdd-qa
+    style MCP fill:#90EE90
+    style NATS fill:#87CEEB
+    style DB fill:#FFD700
+```
 
-qa-engineer
+### Key Benefits
 
-devops
+- **Specialized Expertise**: Each agent is optimized for a specific role
+- **Asynchronous Collaboration**: Agents work independently but coordinate through messaging
+- **Persistent Learning**: Agents learn from past reviews and mistakes
+- **Scalable**: Multiple agents can work in parallel
+- **Reproducible**: All agent communication is logged and auditable
 
-docs-specialist
+---
 
-docs-qa
+## Architecture
 
-Agent Memory
-MCP Server
+### Components
 
-NATS Server
-JetStream
+1. **Custom Agents** - Markdown files defining agent behavior, tools, and permissions
+2. **NATS Server** - Message broker for inter-agent communication
+3. **Agent Memory MCP Server** - Model Context Protocol server exposing NATS and SQLite to agents
+4. **SQLite Database** - Persistent storage for reviews, learnings, and activity logs
+5. **Claude Code** - Execution environment for agents
 
-SQLite
-Memory DB
+### Message Flow States
 
-Key Benefits
-Specialized Expertise: Each agent is optimized for a specific role
-Asynchronous Collaboration: Agents work independently but coordinate through messaging
-Persistent Learning: Agents learn from past reviews and mistakes
-Scalable: Multiple agents can work in parallel
-Reproducible: All agent communication is logged and auditable
-Architecture
-Components
-Custom Agents - Markdown files defining agent behavior, tools, and permissions
-NATS Server - Message broker for inter-agent communication
-Agent Memory MCP Server - Model Context Protocol server exposing NATS and SQLite to agents
-SQLite Database - Persistent storage for reviews, learnings, and activity logs
-Claude Code - Execution environment for agents
-Message Flow States
-Agent starts
+```mermaid
+stateDiagram-v2
+    [*] --> Idle: Agent starts
+    Idle --> Working: broadcast_status("working")
+    Working --> CheckingReviews: get_pending_reviews()
+    CheckingReviews --> Reviewing: Found reviews
+    CheckingReviews --> Coding: No reviews
+    Coding --> RequestingReview: Code complete
+    RequestingReview --> Working: request_review()
+    Reviewing --> SubmittingReview: Review complete
+    SubmittingReview --> Working: submit_review()
+    Working --> Completed: broadcast_status("completed")
+    Completed --> [*]
+```
 
-broadcast_status("working")
+### Data Flow
 
-get_pending_reviews()
+```mermaid
+sequenceDiagram
+    participant Agent1 as TDD Coder
+    participant MCP as MCP Server
+    participant NATS as NATS JetStream
+    participant DB as SQLite DB
+    participant Agent2 as TDD QA
 
-Found reviews
+    Agent1->>MCP: broadcast_status("working")
+    MCP->>NATS: Publish to INTEGRATION stream
 
-No reviews
+    Agent1->>MCP: request_review("tdd-qa", "code", "/path/to/file")
+    MCP->>DB: Store review request
+    MCP->>NATS: Publish to REVIEWS stream
 
-Code complete
+    Agent2->>MCP: get_pending_reviews("tdd-qa")
+    MCP->>NATS: Fetch from REVIEWS stream
+    NATS-->>MCP: Review requests
+    MCP-->>Agent2: Pending reviews
 
-request_review()
+    Agent2->>MCP: get_review_context("tdd-qa", "/path/to/file")
+    MCP->>DB: Query past reviews
+    DB-->>MCP: Historical data
+    MCP-->>Agent2: Context with learnings
 
-Review complete
+    Agent2->>MCP: submit_review(...)
+    MCP->>DB: Store review response & extract learnings
+    MCP->>NATS: Publish to REVIEWS stream
+```
 
-submit_review()
+### File Organization
 
-broadcast_status("completed")
-
-Idle
-
-Working
-
-CheckingReviews
-
-Reviewing
-
-Coding
-
-RequestingReview
-
-SubmittingReview
-
-Completed
-
-Data Flow
-TDD QA
-SQLite DB
-NATS JetStream
-MCP Server
-TDD Coder
-TDD QA
-SQLite DB
-NATS JetStream
-MCP Server
-TDD Coder
-broadcast_status("working")
-Publish to INTEGRATION stream
-request_review("tdd-qa", "code", "/path/to/file")
-Store review request
-Publish to REVIEWS stream
-get_pending_reviews("tdd-qa")
-Fetch from REVIEWS stream
-Review requests
-Pending reviews
-get_review_context("tdd-qa", "/path/to/file")
-Query past reviews
-Historical data
-Context with learnings
-submit_review(...)
-Store review response & extract learnings
-Publish to REVIEWS stream
-File Organization
+```
 project-root/
 ├── .claude/
 │   ├── agents/
@@ -166,10 +164,17 @@ project-root/
 │       ├── test_agent_memory_core.py
 │       └── test_agent_memory_db.py
 └── requirements.txt              # nats-py, fastmcp
-Custom Agents
-Agent Definition Format
-Agents are defined in .claude/agents/*.md files with YAML frontmatter:
+```
 
+---
+
+## Custom Agents
+
+### Agent Definition Format
+
+Agents are defined in `.claude/agents/*.md` files with YAML frontmatter:
+
+```markdown
 ---
 name: agent-name
 color: blue
@@ -182,82 +187,87 @@ permissionMode: bypassPermissions  # optional
 # Agent Name
 
 Agent instructions in markdown...
-Agent Configuration Fields
-Field	Required	Description	Example
-name	Yes	Unique identifier for the agent	tdd-coder
-color	No	Visual identifier in Claude Code UI	green, blue, red
-description	Yes	Brief description of agent's purpose	Autonomous TDD coder agent
-tools	Yes	Comma-separated list of tools agent can use	Read, Edit, Write, Bash
-model	Yes	Claude model to use	sonnet, opus, haiku
-permissionMode	No	Permission handling mode	bypassPermissions
-Available Tools
-Common tools agents use:
+```
 
-File Operations: Read, Edit, Write, Glob, Grep
-Execution: Bash
-Web: WebSearch, WebFetch
-Utilities: TodoWrite, NotebookEdit
-MCP Tools: Any tool exposed by MCP servers (e.g., mcp__agent-memory__*)
-Existing Agents in This Project
-Agent	Role	Key Responsibilities	When to Use
-tdd-coder	TDD Development	Write tests first, implement code, quality gates, commit	Building new features, refactoring existing code
-tdd-qa	Test Quality Assurance	Audit test coverage, identify weak assertions, enforce TDD	After code completion, before merging to main
-qa-engineer	Integration Testing	Deploy to devtest, run browser tests, verify runtime	Before deployments, after major changes
-devops	Infrastructure	Deploy AWS resources, Lambda functions, verify deployments	Infrastructure changes, new environments
-docs-specialist	Documentation Writing	Create/improve docs, add Mermaid diagrams, maintain accuracy	New features needing docs, documentation improvements
-docs-qa	Documentation Accuracy	Verify docs match codebase, check links, find outdated info	After code changes, quarterly doc audits
-web-designer	Web Design	Analyze brand, create landing pages, responsive HTML/CSS	Marketing pages, landing pages, UI components
-value-chain-expert	Business Analysis	Analyze features, strategic impact, value chain mapping	Feature planning, strategic decisions
-Agent Collaboration Patterns
+### Agent Configuration Fields
+
+| Field | Required | Description | Example |
+|-------|----------|-------------|---------|
+| `name` | Yes | Unique identifier for the agent | `tdd-coder` |
+| `color` | No | Visual identifier in Claude Code UI | `green`, `blue`, `red` |
+| `description` | Yes | Brief description of agent's purpose | `Autonomous TDD coder agent` |
+| `tools` | Yes | Comma-separated list of tools agent can use | `Read, Edit, Write, Bash` |
+| `model` | Yes | Claude model to use | `sonnet`, `opus`, `haiku` |
+| `permissionMode` | No | Permission handling mode | `bypassPermissions` |
+
+### Available Tools
+
+Common tools agents use:
+- **File Operations**: `Read`, `Edit`, `Write`, `Glob`, `Grep`
+- **Execution**: `Bash`
+- **Web**: `WebSearch`, `WebFetch`
+- **Utilities**: `TodoWrite`, `NotebookEdit`
+- **MCP Tools**: Any tool exposed by MCP servers (e.g., `mcp__agent-memory__*`)
+
+### Existing Agents in This Project
+
+| Agent | Role | Key Responsibilities | When to Use |
+|-------|------|----------------------|-------------|
+| **tdd-coder** | TDD Development | Write tests first, implement code, quality gates, commit | Building new features, refactoring existing code |
+| **tdd-qa** | Test Quality Assurance | Audit test coverage, identify weak assertions, enforce TDD | After code completion, before merging to main |
+| **qa-engineer** | Integration Testing | Deploy to devtest, run browser tests, verify runtime | Before deployments, after major changes |
+| **devops** | Infrastructure | Deploy AWS resources, Lambda functions, verify deployments | Infrastructure changes, new environments |
+| **docs-specialist** | Documentation Writing | Create/improve docs, add Mermaid diagrams, maintain accuracy | New features needing docs, documentation improvements |
+| **docs-qa** | Documentation Accuracy | Verify docs match codebase, check links, find outdated info | After code changes, quarterly doc audits |
+| **web-designer** | Web Design | Analyze brand, create landing pages, responsive HTML/CSS | Marketing pages, landing pages, UI components |
+| **value-chain-expert** | Business Analysis | Analyze features, strategic impact, value chain mapping | Feature planning, strategic decisions |
+
+### Agent Collaboration Patterns
+
 Common workflows showing how agents work together:
 
-Feature Development Flow
+```mermaid
+flowchart LR
+    subgraph "Feature Development Flow"
+        TC[tdd-coder<br/>writes code]
+        TQ[tdd-qa<br/>reviews tests]
+        DS[docs-specialist<br/>documents]
+        DQ[docs-qa<br/>verifies docs]
+        QE[qa-engineer<br/>integration tests]
+        DO[devops<br/>deploys]
 
-request_review
+        TC -->|request_review| TQ
+        TQ -->|changes_requested| TC
+        TQ -->|approved| DS
+        DS -->|request_review| DQ
+        DQ -->|approved| QE
+        QE -->|tests pass| DO
+        DO -->|deployed| Done[Done]
+    end
 
-changes_requested
+    style TC fill:#90EE90
+    style TQ fill:#FFD700
+    style DS fill:#DDA0DD
+    style DQ fill:#87CEEB
+    style QE fill:#FF6B6B
+    style DO fill:#4169E1
+```
 
-approved
+### Agent Instruction Best Practices
 
-request_review
+1. **Clear Mission**: State the agent's purpose in the first paragraph
+2. **Structured Workflow**: Use numbered steps or phases
+3. **Decision Trees**: Provide clear if/then logic for common scenarios
+4. **Examples**: Include code snippets, command examples, and output formats
+5. **Quality Gates**: Define success criteria and verification steps
+6. **Error Handling**: Describe what to do when things fail
+7. **NATS Integration**: Include the standard NATS communication block (see below)
 
-approved
+### Standard NATS Communication Block
 
-tests pass
-
-deployed
-
-tdd-coder
-writes code
-
-tdd-qa
-reviews tests
-
-docs-specialist
-documents
-
-docs-qa
-verifies docs
-
-qa-engineer
-integration tests
-
-devops
-deploys
-
-Done
-
-Agent Instruction Best Practices
-Clear Mission: State the agent's purpose in the first paragraph
-Structured Workflow: Use numbered steps or phases
-Decision Trees: Provide clear if/then logic for common scenarios
-Examples: Include code snippets, command examples, and output formats
-Quality Gates: Define success criteria and verification steps
-Error Handling: Describe what to do when things fail
-NATS Integration: Include the standard NATS communication block (see below)
-Standard NATS Communication Block
 All agents should include this section:
 
+```markdown
 ## Inter-Agent Communication (NATS)
 
 You have access to MCP tools for communicating with other agents. **USE THESE TOOLS.**
@@ -281,28 +291,43 @@ You have access to MCP tools for communicating with other agents. **USE THESE TO
 - To submit: `mcp__agent-memory__submit_review(requester, item_path, "YOUR_AGENT_NAME", status, findings, summary)`
 
 See `.claude/agents/_shared-nats.md` for full documentation.
-NATS Messaging System
-What is NATS?
-NATS is a lightweight, high-performance message broker. We use NATS JetStream for persistent, replay-able messaging between agents.
+```
 
-Message Streams
+---
+
+## NATS Messaging System
+
+### What is NATS?
+
+NATS is a lightweight, high-performance message broker. We use **NATS JetStream** for persistent, replay-able messaging between agents.
+
+### Message Streams
+
 Agents communicate via four primary streams:
 
-Stream	Purpose	Subjects	Retention
-REQUIREMENTS	Task specifications	requirements.*	7 days
-INTEGRATION	Agent coordination	integration.status.*, integration.*	7 days
-RESULTS	Work outputs	results.<type>.<agent>	30 days
-REVIEWS	Code/doc reviews	reviews.request.*, reviews.response.*	30 days
-Subject Naming Convention
-<stream>.<category>.<target>
-Examples:
+| Stream | Purpose | Subjects | Retention |
+|--------|---------|----------|-----------|
+| **REQUIREMENTS** | Task specifications | `requirements.*` | 7 days |
+| **INTEGRATION** | Agent coordination | `integration.status.*`, `integration.*` | 7 days |
+| **RESULTS** | Work outputs | `results.<type>.<agent>` | 30 days |
+| **REVIEWS** | Code/doc reviews | `reviews.request.*`, `reviews.response.*` | 30 days |
 
-integration.status.tdd-coder - TDD coder's status updates
-reviews.request.tdd-qa - Review requests for TDD QA agent
-results.test_report.qa-engineer - Test reports from QA engineer
-Message Format
+### Subject Naming Convention
+
+```
+<stream>.<category>.<target>
+```
+
+Examples:
+- `integration.status.tdd-coder` - TDD coder's status updates
+- `reviews.request.tdd-qa` - Review requests for TDD QA agent
+- `results.test_report.qa-engineer` - Test reports from QA engineer
+
+### Message Format
+
 All messages are JSON with this structure:
 
+```json
 {
   "sender": "agent-name",
   "timestamp": "2025-12-07T12:00:00Z",
@@ -311,19 +336,30 @@ All messages are JSON with this structure:
     "key": "value"
   }
 }
-For reviews, the message contains a review_request or review_response object.
+```
 
-Agent Memory MCP Server
-What is the Agent Memory Server?
-The Agent Memory MCP Server is a Model Context Protocol (MCP) server that exposes NATS messaging and SQLite database operations as tools that Claude agents can use.
+For reviews, the message contains a `review_request` or `review_response` object.
 
-MCP Server Location
-Server Script: scripts/agent_memory_server.py
-Core Logic: scripts/agent_memory_core.py (testable business logic)
-Database: scripts/agent_memory_db.py (SQLite schema and queries)
-Tests: tests/unit/test_agent_memory_server.py, tests/unit/test_agent_memory_db.py
-Available MCP Tools
-Status & Coordination
+---
+
+## Agent Memory MCP Server
+
+### What is the Agent Memory Server?
+
+The Agent Memory MCP Server is a **Model Context Protocol (MCP)** server that exposes NATS messaging and SQLite database operations as tools that Claude agents can use.
+
+### MCP Server Location
+
+- **Server Script**: `scripts/agent_memory_server.py`
+- **Core Logic**: `scripts/agent_memory_core.py` (testable business logic)
+- **Database**: `scripts/agent_memory_db.py` (SQLite schema and queries)
+- **Tests**: `tests/unit/test_agent_memory_server.py`, `tests/unit/test_agent_memory_db.py`
+
+### Available MCP Tools
+
+#### Status & Coordination
+
+```python
 mcp__agent-memory__broadcast_status(agent, status, current_task, progress)
 # Broadcast agent status to all other agents
 # status: "idle", "working", "blocked", "completed"
@@ -331,14 +367,22 @@ mcp__agent-memory__broadcast_status(agent, status, current_task, progress)
 
 mcp__agent-memory__get_all_agent_statuses()
 # Get the latest status from all agents
-Messaging
+```
+
+#### Messaging
+
+```python
 mcp__agent-memory__publish_message(stream, subject, message, sender, metadata)
 # Publish a message to a NATS stream
 
 mcp__agent-memory__get_messages(stream, subject, limit)
 # Get recent messages from a NATS stream
 # subject: Optional filter (e.g., "requirements.qa")
-Reviews
+```
+
+#### Reviews
+
+```python
 mcp__agent-memory__request_review(reviewer, item_type, item_path, description, requester, priority)
 # Request a review from another agent
 # item_type: "code", "documentation", "test", "config"
@@ -351,14 +395,22 @@ mcp__agent-memory__submit_review(original_requester, item_path, reviewer, status
 
 mcp__agent-memory__get_pending_reviews(agent)
 # Get pending review requests for an agent
-Results
+```
+
+#### Results
+
+```python
 mcp__agent-memory__share_result(result_type, title, content, sender, tags)
 # Share a work result with other agents
 # result_type: "test_report", "deployment", "analysis", "documentation"
 
 mcp__agent-memory__get_agent_results(agent, result_type, limit)
 # Get results shared by agents
-Memory & Learning
+```
+
+#### Memory & Learning
+
+```python
 mcp__agent-memory__get_review_context(reviewer, item_path)
 # Get context about a file before reviewing it
 # Returns: past reviews, known issues, common findings
@@ -376,35 +428,49 @@ mcp__agent-memory__get_common_issues(category)
 
 mcp__agent-memory__get_file_history(item_path)
 # Get review history for a specific file
-Database Schema
-The SQLite database (data/agent_memory.db) stores:
+```
 
-reviews - Review requests and responses
-review_findings - Individual findings from reviews
-learnings - Extracted patterns and recommendations
-results - Shared work results
-activity_log - Agent activity history
+### Database Schema
+
+The SQLite database (`data/agent_memory.db`) stores:
+
+1. **reviews** - Review requests and responses
+2. **review_findings** - Individual findings from reviews
+3. **learnings** - Extracted patterns and recommendations
+4. **results** - Shared work results
+5. **activity_log** - Agent activity history
+
 Key features:
+- Automatic learning extraction from review findings
+- Pattern recognition for common issues
+- File-level review history
+- Agent-specific learning retrieval
 
-Automatic learning extraction from review findings
-Pattern recognition for common issues
-File-level review history
-Agent-specific learning retrieval
-Setup Guide
-Prerequisites
-Python 3.11+
-NATS Server (with JetStream enabled)
-Claude Code or Claude API access
-Step 1: Install NATS Server
-Option A: Docker (Recommended)
+---
 
+## Setup Guide
+
+### Prerequisites
+
+- Python 3.11+
+- NATS Server (with JetStream enabled)
+- Claude Code or Claude API access
+
+### Step 1: Install NATS Server
+
+**Option A: Docker (Recommended)**
+
+```bash
 docker run -d --name nats-server \
   -p 4222:4222 \
   -p 8222:8222 \
   nats:latest \
   -js
-Option B: Native Installation
+```
 
+**Option B: Native Installation**
+
+```bash
 # macOS
 brew install nats-server
 
@@ -412,13 +478,22 @@ brew install nats-server
 wget https://github.com/nats-io/nats-server/releases/download/v2.10.7/nats-server-v2.10.7-linux-amd64.tar.gz
 tar -xzf nats-server-v2.10.7-linux-amd64.tar.gz
 sudo mv nats-server-v2.10.7-linux-amd64/nats-server /usr/local/bin/
-Start NATS with JetStream:
+```
 
+**Start NATS with JetStream:**
+
+```bash
 nats-server -js
-Verify it's running:
+```
 
+Verify it's running:
+```bash
 curl http://localhost:8222/varz
-Step 2: Install Python Dependencies
+```
+
+### Step 2: Install Python Dependencies
+
+```bash
 # Add to requirements.txt
 nats-py>=2.7.0
 
@@ -427,7 +502,11 @@ fastmcp>=0.4.0
 
 # Install
 pip install nats-py fastmcp
-Step 3: Create NATS Streams
+```
+
+### Step 3: Create NATS Streams
+
+```bash
 # Option 1: Use NATS CLI
 nats stream add REQUIREMENTS --subjects "requirements.*" --storage file --retention limits --max-age 7d
 nats stream add INTEGRATION --subjects "integration.*" --storage file --retention limits --max-age 7d
@@ -435,9 +514,13 @@ nats stream add RESULTS --subjects "results.*" --storage file --retention limits
 nats stream add REVIEWS --subjects "reviews.*" --storage file --retention limits --max-age 30d
 
 # Option 2: Streams are auto-created by the MCP server on first use (recommended)
-Step 4: Configure MCP Server in Claude Code
-Create or update .claude/settings.local.json:
+```
 
+### Step 4: Configure MCP Server in Claude Code
+
+Create or update `.claude/settings.local.json`:
+
+```json
 {
   "permissions": {
     "allow": [
@@ -456,19 +539,24 @@ Create or update .claude/settings.local.json:
     }
   }
 }
-Important: Use absolute paths for:
+```
 
-Python interpreter (/path/to/venv/bin/python)
-Server script (/path/to/scripts/agent_memory_server.py)
-Database path (/path/to/data/agent_memory.db)
-Step 5: Create Agent Definitions
-Create .claude/agents/_shared-nats.md with the communication protocol (see example in this repo).
+**Important**: Use absolute paths for:
+- Python interpreter (`/path/to/venv/bin/python`)
+- Server script (`/path/to/scripts/agent_memory_server.py`)
+- Database path (`/path/to/data/agent_memory.db`)
 
-Create individual agent files (.claude/agents/agent-name.md) with YAML frontmatter and instructions.
+### Step 5: Create Agent Definitions
 
-Step 6: Test the Setup
-Test NATS connectivity:
+Create `.claude/agents/_shared-nats.md` with the communication protocol (see example in this repo).
 
+Create individual agent files (`.claude/agents/agent-name.md`) with YAML frontmatter and instructions.
+
+### Step 6: Test the Setup
+
+**Test NATS connectivity:**
+
+```bash
 python3 << 'EOF'
 import asyncio
 from agent_memory_core import get_nats, publish_message
@@ -482,27 +570,41 @@ async def test():
 
 asyncio.run(test())
 EOF
-Test MCP server:
+```
 
+**Test MCP server:**
+
+```bash
 # Start the server manually
 export NATS_URL="nats://localhost:4222"
 python scripts/agent_memory_server.py
-Test from Claude Code:
+```
+
+**Test from Claude Code:**
 
 Open Claude Code, select an agent, and run:
-
+```
 @tdd-coder Please broadcast your status as "testing" with progress 0
-The agent should use mcp__agent-memory__broadcast_status(...).
+```
 
-Porting to a New Project
-Checklist
-[ ] Install NATS server
-[ ] Copy agent infrastructure files
-[ ] Update agent definitions for new project
-[ ] Configure MCP server in Claude settings
-[ ] Create project-specific NATS streams (or let them auto-create)
-[ ] Test communication between agents
-Files to Copy
+The agent should use `mcp__agent-memory__broadcast_status(...)`.
+
+---
+
+## Porting to a New Project
+
+### Checklist
+
+- [ ] Install NATS server
+- [ ] Copy agent infrastructure files
+- [ ] Update agent definitions for new project
+- [ ] Configure MCP server in Claude settings
+- [ ] Create project-specific NATS streams (or let them auto-create)
+- [ ] Test communication between agents
+
+### Files to Copy
+
+```
 Source Project                    → Destination Project
 ──────────────────────────────────────────────────────────
 scripts/agent_memory_server.py    → scripts/agent_memory_server.py
@@ -510,9 +612,13 @@ scripts/agent_memory_core.py      → scripts/agent_memory_core.py
 scripts/agent_memory_db.py        → scripts/agent_memory_db.py
 .claude/agents/_shared-nats.md    → .claude/agents/_shared-nats.md
 tests/unit/test_agent_memory_*.py → tests/unit/test_agent_memory_*.py
-10-Minute Quick Start
+```
+
+### 10-Minute Quick Start
+
 For those who just want to get it working fast:
 
+```bash
 # 1. Install NATS (Docker)
 docker run -d --name nats -p 4222:4222 -p 8222:8222 nats:latest -js
 
@@ -550,32 +656,53 @@ export NATS_URL="nats://localhost:4222"
 python3 -c "import asyncio; from scripts.agent_memory_core import get_nats; asyncio.run(get_nats())"
 
 # 6. Done! Open Claude Code and select an agent
-Step-by-Step Porting Guide
-1. Copy Infrastructure Scripts
+```
+
+### Step-by-Step Porting Guide
+
+#### 1. Copy Infrastructure Scripts
+
+```bash
 # From source project
 cd /path/to/source-project
 mkdir -p /path/to/new-project/scripts
 cp scripts/agent_memory_*.py /path/to/new-project/scripts/
-2. Create Agent Configuration Directory
+```
+
+#### 2. Create Agent Configuration Directory
+
+```bash
 cd /path/to/new-project
 mkdir -p .claude/agents
-3. Copy Shared NATS Documentation
+```
+
+#### 3. Copy Shared NATS Documentation
+
+```bash
 cp /path/to/source-project/.claude/agents/_shared-nats.md \
    /path/to/new-project/.claude/agents/_shared-nats.md
-4. Create New Agent Definitions
+```
+
+#### 4. Create New Agent Definitions
+
 Instead of copying all agents, create only the ones relevant to your new project:
 
+```bash
 # Example: Copy TDD-focused agents for a new backend project
 cp /path/to/source/.claude/agents/tdd-coder.md /path/to/new/.claude/agents/
 cp /path/to/source/.claude/agents/tdd-qa.md /path/to/new/.claude/agents/
 cp /path/to/source/.claude/agents/devops.md /path/to/new/.claude/agents/
-Customize agent instructions for the new project:
+```
 
-Update technology stack references (Python → Node.js, AWS → GCP, etc.)
-Modify quality gates (coverage thresholds, linting tools)
-Adjust file paths and directory structure
-Update deployment procedures
-5. Update Dependencies
+**Customize agent instructions** for the new project:
+- Update technology stack references (Python → Node.js, AWS → GCP, etc.)
+- Modify quality gates (coverage thresholds, linting tools)
+- Adjust file paths and directory structure
+- Update deployment procedures
+
+#### 5. Update Dependencies
+
+```bash
 cd /path/to/new-project
 
 # Add to requirements.txt
@@ -585,9 +712,13 @@ echo "nats-py>=2.7.0" >> requirements.txt
 echo "fastmcp>=0.4.0" >> requirements-dev.txt
 
 pip install -r requirements.txt -r requirements-dev.txt
-6. Configure Claude Code MCP Server
-Create .claude/settings.local.json:
+```
 
+#### 6. Configure Claude Code MCP Server
+
+Create `.claude/settings.local.json`:
+
+```json
 {
   "permissions": {
     "allow": [
@@ -609,13 +740,21 @@ Create .claude/settings.local.json:
     }
   }
 }
-Critical: Use absolute paths, not relative ones.
+```
 
-7. Create Data Directory
+**Critical**: Use **absolute paths**, not relative ones.
+
+#### 7. Create Data Directory
+
+```bash
 mkdir -p data
+```
+
 The SQLite database will be created automatically on first use.
 
-8. Start NATS Server
+#### 8. Start NATS Server
+
+```bash
 # If using Docker
 docker run -d --name nats-server \
   -p 4222:4222 \
@@ -624,7 +763,11 @@ docker run -d --name nats-server \
 
 # If installed natively
 nats-server -js
-9. Verify Setup
+```
+
+#### 9. Verify Setup
+
+```bash
 # Test NATS connection
 python3 << 'EOF'
 import asyncio
@@ -639,173 +782,236 @@ asyncio.run(test())
 EOF
 
 # Expected output: ✓ Connected to NATS: True
+```
+
+```bash
 # Test MCP server startup
 export NATS_URL="nats://localhost:4222"
 python scripts/agent_memory_server.py &
 
 # Should see: FastMCP server running...
-10. Test Agent Communication
-Open Claude Code, select an agent (e.g., tdd-coder), and ask:
+```
 
+#### 10. Test Agent Communication
+
+Open Claude Code, select an agent (e.g., `tdd-coder`), and ask:
+
+```
 Please broadcast your status as "idle" and check for any pending reviews.
-The agent should execute:
+```
 
+The agent should execute:
+```python
 mcp__agent-memory__broadcast_status("tdd-coder", "idle", "Waiting for tasks", 0)
 mcp__agent-memory__get_pending_reviews("tdd-coder")
-Customization for Different Project Types
-Backend API Project (Python/FastAPI)
+```
+
+### Customization for Different Project Types
+
+#### Backend API Project (Python/FastAPI)
+
 Key agents:
+- `tdd-coder` - Write API endpoints with tests
+- `tdd-qa` - Audit test coverage
+- `devops` - Deploy to AWS/GCP
+- `docs-specialist` - API documentation
 
-tdd-coder - Write API endpoints with tests
-tdd-qa - Audit test coverage
-devops - Deploy to AWS/GCP
-docs-specialist - API documentation
 Customize:
+- Update tech stack references (FastAPI, Pydantic, pytest)
+- Adjust deployment targets
+- Modify quality gates for API testing
 
-Update tech stack references (FastAPI, Pydantic, pytest)
-Adjust deployment targets
-Modify quality gates for API testing
-Frontend Project (React/TypeScript)
+#### Frontend Project (React/TypeScript)
+
 Key agents:
+- `web-designer` - Design components and pages
+- `tdd-coder` - Write React components with tests
+- `qa-engineer` - Browser testing with Playwright
+- `docs-specialist` - Component documentation
 
-web-designer - Design components and pages
-tdd-coder - Write React components with tests
-qa-engineer - Browser testing with Playwright
-docs-specialist - Component documentation
 Customize:
+- Replace Python references with TypeScript
+- Update test commands (pytest → jest)
+- Modify quality gates (eslint, prettier)
 
-Replace Python references with TypeScript
-Update test commands (pytest → jest)
-Modify quality gates (eslint, prettier)
-Infrastructure/DevOps Project (Terraform)
+#### Infrastructure/DevOps Project (Terraform)
+
 Key agents:
+- `devops` - Deploy infrastructure
+- `docs-specialist` - Infrastructure documentation
+- `qa-engineer` - Integration testing
 
-devops - Deploy infrastructure
-docs-specialist - Infrastructure documentation
-qa-engineer - Integration testing
 Customize:
+- Focus on Terraform, CloudFormation, or Pulumi
+- Update deployment verification steps
+- Add infrastructure-specific quality gates
 
-Focus on Terraform, CloudFormation, or Pulumi
-Update deployment verification steps
-Add infrastructure-specific quality gates
-Data Science/ML Project (Python/Jupyter)
+#### Data Science/ML Project (Python/Jupyter)
+
 Key agents:
+- `tdd-coder` - Write data pipelines with tests
+- `docs-specialist` - Document models and experiments
+- `qa-engineer` - Validate model outputs
 
-tdd-coder - Write data pipelines with tests
-docs-specialist - Document models and experiments
-qa-engineer - Validate model outputs
 Customize:
+- Add notebook handling
+- Update test requirements (data validation)
+- Include model versioning and experiment tracking
 
-Add notebook handling
-Update test requirements (data validation)
-Include model versioning and experiment tracking
-Troubleshooting
-NATS Connection Issues
-Problem: Error connecting to NATS
+---
 
-Solutions:
+## Troubleshooting
 
-Verify NATS is running:
-curl http://localhost:8222/varz
-Check the NATS URL:
-echo $NATS_URL  # Should be nats://localhost:4222
-Check firewall/port:
-netstat -an | grep 4222
-Restart NATS:
-docker restart nats-server
-# or
-killall nats-server && nats-server -js
-MCP Server Not Starting
-Problem: MCP server fails to start in Claude Code
+### NATS Connection Issues
 
-Solutions:
+**Problem**: `Error connecting to NATS`
 
-Check paths in .claude/settings.local.json are absolute
-Verify Python has required packages:
-/path/to/venv/bin/python -c "import fastmcp, nats"
-Test server manually:
-export NATS_URL="nats://localhost:4222"
-/path/to/venv/bin/python scripts/agent_memory_server.py
-Check Claude Code logs for errors
-Ensure data/ directory exists and is writable
-Agents Not Communicating
-Problem: Agent calls MCP tools but messages don't appear
+**Solutions**:
+1. Verify NATS is running:
+   ```bash
+   curl http://localhost:8222/varz
+   ```
+2. Check the NATS URL:
+   ```bash
+   echo $NATS_URL  # Should be nats://localhost:4222
+   ```
+3. Check firewall/port:
+   ```bash
+   netstat -an | grep 4222
+   ```
+4. Restart NATS:
+   ```bash
+   docker restart nats-server
+   # or
+   killall nats-server && nats-server -js
+   ```
 
-Solutions:
+### MCP Server Not Starting
 
-Verify streams exist:
-nats stream ls
-Check message flow:
-nats stream info INTEGRATION
-Monitor NATS in real-time:
-nats sub "integration.>" --stream INTEGRATION
-Check database for stored data:
-sqlite3 data/agent_memory.db "SELECT * FROM reviews LIMIT 5;"
-Database Locked Errors
-Problem: database is locked errors
+**Problem**: MCP server fails to start in Claude Code
 
-Solutions:
+**Solutions**:
+1. Check paths in `.claude/settings.local.json` are absolute
+2. Verify Python has required packages:
+   ```bash
+   /path/to/venv/bin/python -c "import fastmcp, nats"
+   ```
+3. Test server manually:
+   ```bash
+   export NATS_URL="nats://localhost:4222"
+   /path/to/venv/bin/python scripts/agent_memory_server.py
+   ```
+4. Check Claude Code logs for errors
+5. Ensure `data/` directory exists and is writable
 
-Ensure only one MCP server instance is running
-Close any SQLite browser/editor connections
-Reset the database:
-mv data/agent_memory.db data/agent_memory.db.bak
-Add timeout to database connections (already implemented in agent_memory_db.py)
-Permission Denied Errors
-Problem: Agent can't use MCP tools
+### Agents Not Communicating
 
-Solutions:
+**Problem**: Agent calls MCP tools but messages don't appear
 
-Add MCP tool permissions to .claude/settings.local.json:
-{
-  "permissions": {
-    "allow": ["mcp__agent-memory__*"]
-  }
-}
-Use permissionMode: bypassPermissions in agent frontmatter (use with caution)
-Restart Claude Code after changing settings
-Advanced Features
-Learning from Reviews
+**Solutions**:
+1. Verify streams exist:
+   ```bash
+   nats stream ls
+   ```
+2. Check message flow:
+   ```bash
+   nats stream info INTEGRATION
+   ```
+3. Monitor NATS in real-time:
+   ```bash
+   nats sub "integration.>" --stream INTEGRATION
+   ```
+4. Check database for stored data:
+   ```bash
+   sqlite3 data/agent_memory.db "SELECT * FROM reviews LIMIT 5;"
+   ```
+
+### Database Locked Errors
+
+**Problem**: `database is locked` errors
+
+**Solutions**:
+1. Ensure only one MCP server instance is running
+2. Close any SQLite browser/editor connections
+3. Reset the database:
+   ```bash
+   mv data/agent_memory.db data/agent_memory.db.bak
+   ```
+4. Add timeout to database connections (already implemented in `agent_memory_db.py`)
+
+### Permission Denied Errors
+
+**Problem**: Agent can't use MCP tools
+
+**Solutions**:
+1. Add MCP tool permissions to `.claude/settings.local.json`:
+   ```json
+   {
+     "permissions": {
+       "allow": ["mcp__agent-memory__*"]
+     }
+   }
+   ```
+2. Use `permissionMode: bypassPermissions` in agent frontmatter (use with caution)
+3. Restart Claude Code after changing settings
+
+---
+
+## Advanced Features
+
+### Learning from Reviews
+
 The agent memory system automatically extracts learnings from review findings. When an agent submits a review with findings, the system:
 
-Analyzes finding severity, categories, and patterns
-Stores learnings in the learnings table
-Increments times_seen for recurring patterns
-Makes learnings available via get_my_learnings() and get_common_issues()
-Example: If tdd-qa repeatedly finds "missing edge case tests", agents can query this pattern before writing new tests.
+1. Analyzes finding severity, categories, and patterns
+2. Stores learnings in the `learnings` table
+3. Increments `times_seen` for recurring patterns
+4. Makes learnings available via `get_my_learnings()` and `get_common_issues()`
 
-Review Context
-Before reviewing a file, agents should call get_review_context() to see:
+**Example**: If `tdd-qa` repeatedly finds "missing edge case tests", agents can query this pattern before writing new tests.
 
-Past reviews of this file
-Known issues in this file
-Common findings for this reviewer
-Historical outcomes (approved, changes_requested)
+### Review Context
+
+Before reviewing a file, agents should call `get_review_context()` to see:
+- Past reviews of this file
+- Known issues in this file
+- Common findings for this reviewer
+- Historical outcomes (approved, changes_requested)
+
 This prevents repeating the same feedback and helps maintain consistency.
 
-Coder Context
-Before modifying a file, agents should call get_coder_context() to see:
+### Coder Context
 
-Previous review feedback on this file
-Known issues to avoid
-Patterns that have caused problems
+Before modifying a file, agents should call `get_coder_context()` to see:
+- Previous review feedback on this file
+- Known issues to avoid
+- Patterns that have caused problems
+
 This helps avoid making mistakes that previous reviews flagged.
 
-Custom Message Streams
+### Custom Message Streams
+
 You can create custom streams for specialized communication:
 
+```bash
 nats stream add CUSTOM_STREAM \
   --subjects "custom.*" \
   --storage file \
   --retention limits \
   --max-age 7d
-Then publish/subscribe:
+```
 
+Then publish/subscribe:
+```python
 await publish_message("CUSTOM_STREAM", "custom.mysubject", "Message", "sender")
 messages = await get_messages("CUSTOM_STREAM", "custom.mysubject", 10)
-Agent Activity Analytics
+```
+
+### Agent Activity Analytics
+
 Query the activity log for insights:
 
+```sql
 -- Most active agents
 SELECT agent, COUNT(*) as activities
 FROM activity_log
@@ -823,53 +1029,76 @@ SELECT category, COUNT(*) as occurrences
 FROM learnings
 GROUP BY category
 ORDER BY occurrences DESC;
-Multi-Project Setup
+```
+
+### Multi-Project Setup
+
 To run multiple projects with separate agent memories:
 
-Use different NATS ports:
+1. Use different NATS ports:
+   ```bash
+   # Project A
+   nats-server -js -p 4222
 
-# Project A
-nats-server -js -p 4222
+   # Project B
+   nats-server -js -p 4223
+   ```
 
-# Project B
-nats-server -js -p 4223
-Use separate databases:
+2. Use separate databases:
+   ```json
+   {
+     "mcpServers": {
+       "agent-memory": {
+         "env": {
+           "NATS_URL": "nats://localhost:4222",
+           "AGENT_MEMORY_DB": "/path/to/projectA/data/agent_memory.db"
+         }
+       }
+     }
+   }
+   ```
 
-{
-  "mcpServers": {
-    "agent-memory": {
-      "env": {
-        "NATS_URL": "nats://localhost:4222",
-        "AGENT_MEMORY_DB": "/path/to/projectA/data/agent_memory.db"
-      }
-    }
-  }
-}
-Or use NATS stream prefixes:
+3. Or use NATS stream prefixes:
+   ```python
+   # In agent_memory_core.py
+   STREAM_PREFIX = os.getenv("STREAM_PREFIX", "")
+   streams = [f"{STREAM_PREFIX}REQUIREMENTS", f"{STREAM_PREFIX}INTEGRATION", ...]
+   ```
 
-# In agent_memory_core.py
-STREAM_PREFIX = os.getenv("STREAM_PREFIX", "")
-streams = [f"{STREAM_PREFIX}REQUIREMENTS", f"{STREAM_PREFIX}INTEGRATION", ...]
-References
-External Documentation
-NATS: https://docs.nats.io/
-NATS JetStream: https://docs.nats.io/nats-concepts/jetstream
-FastMCP: https://github.com/jlowin/fastmcp
-Model Context Protocol: https://modelcontextprotocol.io/
-Project Files
-Agent definitions: .claude/agents/*.md
-MCP server: scripts/agent_memory_server.py
-Core logic: scripts/agent_memory_core.py
-Database: scripts/agent_memory_db.py
-Tests: tests/unit/test_agent_memory_*.py
-Related Documentation
-CLAUDE.md - Project development rules
-DEVELOPMENT_PLAN.md - Task breakdown and progress
-product-brief-security-assessment-platform.md - Product specifications
-Real-World Examples
-Example 1: Code Review Flow
-Scenario: TDD Coder completes a new feature and requests a review from TDD QA.
+---
 
+## References
+
+### External Documentation
+
+- **NATS**: https://docs.nats.io/
+- **NATS JetStream**: https://docs.nats.io/nats-concepts/jetstream
+- **FastMCP**: https://github.com/jlowin/fastmcp
+- **Model Context Protocol**: https://modelcontextprotocol.io/
+
+### Project Files
+
+- Agent definitions: `.claude/agents/*.md`
+- MCP server: `scripts/agent_memory_server.py`
+- Core logic: `scripts/agent_memory_core.py`
+- Database: `scripts/agent_memory_db.py`
+- Tests: `tests/unit/test_agent_memory_*.py`
+
+### Related Documentation
+
+- `CLAUDE.md` - Project development rules
+- `DEVELOPMENT_PLAN.md` - Task breakdown and progress
+- `product-brief-security-assessment-platform.md` - Product specifications
+
+---
+
+## Real-World Examples
+
+### Example 1: Code Review Flow
+
+**Scenario**: TDD Coder completes a new feature and requests a review from TDD QA.
+
+```python
 # TDD Coder broadcasts status
 mcp__agent-memory__broadcast_status(
     agent="tdd-coder",
@@ -896,8 +1125,11 @@ mcp__agent-memory__share_result(
     sender="tdd-coder",
     tags=["authentication", "security", "jwt"]
 )
-TDD QA receives the review request:
+```
 
+**TDD QA receives the review request:**
+
+```python
 # TDD QA checks for pending reviews
 reviews = mcp__agent-memory__get_pending_reviews("tdd-qa")
 # Returns: [{review_id: "review-abc123", item_path: "src/auth/user_auth.py", ...}]
@@ -933,9 +1165,13 @@ mcp__agent-memory__submit_review(
     ],
     summary="Good coverage overall (95%), but missing critical security test case for expired tokens. Fix high priority finding before merge."
 )
-Example 2: DevOps Deployment with QA Verification
-Scenario: DevOps deploys to staging and requests QA Engineer to verify.
+```
 
+### Example 2: DevOps Deployment with QA Verification
+
+**Scenario**: DevOps deploys to staging and requests QA Engineer to verify.
+
+```python
 # DevOps broadcasts deployment start
 mcp__agent-memory__broadcast_status(
     agent="devops",
@@ -962,8 +1198,11 @@ mcp__agent-memory__request_review(
     requester="devops",
     priority="urgent"
 )
-QA Engineer verifies the deployment:
+```
 
+**QA Engineer verifies the deployment:**
+
+```python
 # QA Engineer gets pending reviews
 reviews = mcp__agent-memory__get_pending_reviews("qa-engineer")
 
@@ -985,9 +1224,13 @@ mcp__agent-memory__share_result(
     sender="qa-engineer",
     tags=["testing", "staging", "v1.2.0", "passing"]
 )
-Example 3: Documentation Workflow
-Scenario: Docs Specialist creates documentation, Docs QA verifies accuracy.
+```
 
+### Example 3: Documentation Workflow
+
+**Scenario**: Docs Specialist creates documentation, Docs QA verifies accuracy.
+
+```python
 # Docs Specialist broadcasts status
 mcp__agent-memory__broadcast_status(
     agent="docs-specialist",
@@ -1005,8 +1248,11 @@ mcp__agent-memory__request_review(
     requester="docs-specialist",
     priority="normal"
 )
-Docs QA verifies the documentation:
+```
 
+**Docs QA verifies the documentation:**
+
+```python
 # Docs QA gets context (past issues with this file)
 context = mcp__agent-memory__get_review_context(
     reviewer="docs-qa",
@@ -1035,9 +1281,13 @@ mcp__agent-memory__submit_review(
     ],
     summary="Found 2 accuracy issues: incorrect endpoint path and mismatched field name. Fix before publishing."
 )
-Example 4: Learning from Past Reviews
-Scenario: TDD QA reviews similar code and learns from past patterns.
+```
 
+### Example 4: Learning from Past Reviews
+
+**Scenario**: TDD QA reviews similar code and learns from past patterns.
+
+```python
 # Before reviewing, TDD QA checks their learnings
 learnings = mcp__agent-memory__get_my_learnings(
     agent="tdd-qa",
@@ -1077,9 +1327,13 @@ history = mcp__agent-memory__get_file_history("src/auth/user_auth.py")
 # 1. Avoid repeating same feedback
 # 2. Check if past issues were fixed
 # 3. Apply learnings to new code
-Example 5: Cross-Agent Coordination
-Scenario: Multiple agents coordinate on a complex feature.
+```
 
+### Example 5: Cross-Agent Coordination
+
+**Scenario**: Multiple agents coordinate on a complex feature.
+
+```python
 # TDD Coder checks what other agents are doing
 statuses = mcp__agent-memory__get_all_agent_statuses()
 # Returns: [
@@ -1110,18 +1364,31 @@ mcp__agent-memory__publish_message(
     sender="docs-specialist",
     metadata={"task_created": "Update auth docs"}
 )
-Changelog
-Version 1.0 (2025-12-07)
-Initial documentation
-Covers NATS setup, MCP server, agent definitions
-Includes porting guide and troubleshooting
-Documents learning and memory features
-Contributing
+```
+
+---
+
+## Changelog
+
+### Version 1.0 (2025-12-07)
+
+- Initial documentation
+- Covers NATS setup, MCP server, agent definitions
+- Includes porting guide and troubleshooting
+- Documents learning and memory features
+
+---
+
+## Contributing
+
 When updating this infrastructure:
 
-Update this documentation
-Add tests for new features
-Update _shared-nats.md if communication protocol changes
-Version the database schema if changing SQLite structure
-Document breaking changes in changelog
-End of Documentation
+1. Update this documentation
+2. Add tests for new features
+3. Update `_shared-nats.md` if communication protocol changes
+4. Version the database schema if changing SQLite structure
+5. Document breaking changes in changelog
+
+---
+
+**End of Documentation**
