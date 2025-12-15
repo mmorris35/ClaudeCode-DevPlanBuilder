@@ -223,6 +223,10 @@ For every subtask, Claude Code will:
   - What makes a plan "Haiku-executable"
   - Recommended subtask structure
   - Before/after examples
+- **[docs/AUTONOMOUS_EXECUTION.md](docs/AUTONOMOUS_EXECUTION.md)** - Run the executor agent hands-free
+  - When `--dangerously-skip-permissions` is safe (and when it's not)
+  - Commands for executing subtasks, tasks, phases, or entire projects
+  - Monitoring progress and troubleshooting
 
 ### Example Artifacts
 
