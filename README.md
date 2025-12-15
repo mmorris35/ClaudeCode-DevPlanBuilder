@@ -370,6 +370,51 @@ Just keep going until all subtasks are complete!
 
 ---
 
+## 🚀 Autonomous Execution (Hands-Free Mode)
+
+Want Claude to build your entire project without asking for approval at every step? You can run in autonomous mode using `--dangerously-skip-permissions`.
+
+### When Is This Safe?
+
+**Safe for:**
+- ✅ Brand new projects in isolated directories
+- ✅ Directories containing only DevPlan-generated planning files
+- ✅ Development machines (not production servers)
+
+**Not safe for:**
+- ❌ Existing production code
+- ❌ Directories with sensitive data or credentials
+- ❌ System directories or your home folder
+
+The flag is called "dangerously" for a reason - it bypasses safety prompts. For greenfield projects in isolated folders, this is fine. For anything touching production, **don't use this flag**.
+
+### Quick Example
+
+```bash
+# Execute a single subtask autonomously
+claude --dangerously-skip-permissions \
+  "Execute subtask 1.2.3 following CLAUDE.md and DEVELOPMENT_PLAN.md"
+
+# Execute an entire phase
+claude --dangerously-skip-permissions \
+  "Execute all tasks in Phase 1. For each task: create feature branch, complete all subtasks with commits, merge when done."
+
+# Build the entire project
+claude --dangerously-skip-permissions \
+  "Execute the entire DEVELOPMENT_PLAN.md from current progress. Follow git discipline throughout."
+```
+
+### Recommended Workflow
+
+1. **Plan interactively** - Answer interview questions, review generated files
+2. **Execute Phase 0 interactively** - Set up foundation with your oversight
+3. **Switch to autonomous for development phases** - Let Claude build while you grab coffee
+4. **Review between phases** - Check git history, run tests, verify progress
+
+See **[docs/AUTONOMOUS_EXECUTION.md](docs/AUTONOMOUS_EXECUTION.md)** for the complete guide including safety checklists, troubleshooting, and monitoring tips.
+
+---
+
 ## 💪 Why This Works
 
 ### Traditional Approach:
