@@ -30,9 +30,10 @@ Claude Code will guide you through creating a `PROJECT_BRIEF.md` by asking about
 ### Step 3: Get Your Development Plan
 
 Claude Code will generate:
-- ✅ **claude.md** - Rules for how Claude Code should work on your project
+- ✅ **CLAUDE.md** - Rules for how Claude Code should work on your project
+- ✅ **PROJECT_BRIEF.md** - Your requirements captured in a structured format
 - ✅ **DEVELOPMENT_PLAN.md** - Paint-by-numbers roadmap with numbered subtasks
-- ✅ **Complete project structure** - Ready to start building
+- ✅ **`.claude/agents/{project}-executor.md`** - Specialized agent to execute your plan
 
 ### Step 4: Build Your Product
 
@@ -85,6 +86,22 @@ Task 1.2: User Authentication
 - **One branch per task** (e.g., `feature/1-2-user-auth`)
 - **Multiple commits per task** (one for each subtask)
 - **Merge when task complete** (not after each subtask)
+
+### 🤖 The Executor Agent
+
+Each project gets a specialized agent file at `.claude/agents/{project-name}-executor.md`. This agent:
+
+- **Knows your project** - Has context about tech stack, architecture, and phases
+- **References your docs** - Reads CLAUDE.md, PROJECT_BRIEF.md, and DEVELOPMENT_PLAN.md
+- **Expects executable plans** - Plans must have complete, copy-pasteable code (not vague descriptions)
+- **Follows git discipline** - One branch per task, commits per subtask, verification before commits
+
+**To use the agent**, invoke it with a subtask:
+```
+@taskflow-executor execute subtask 1.2.3
+```
+
+The agent will read your planning documents, verify prerequisites, implement the deliverables, run verification, and commit the changes.
 
 ---
 
@@ -154,7 +171,15 @@ Each **subtask** includes:
 - Success criteria (how to verify it works)
 - Completion notes template (knowledge capture)
 
-### 5. **Guide You Through Execution**
+### 5. **Create an Executor Agent**
+
+A specialized agent file at `.claude/agents/{project-name}-executor.md` that:
+- Has your project context baked in (tech stack, phases, directory structure)
+- References CLAUDE.md, PROJECT_BRIEF.md, and DEVELOPMENT_PLAN.md
+- Expects "Haiku-executable" plans with complete, copy-pasteable code
+- Follows strict git discipline (verify → implement → test → commit)
+
+### 6. **Guide You Through Execution**
 
 For every subtask, Claude Code will:
 - Read the full context (claude.md + DEVELOPMENT_PLAN.md)
@@ -194,6 +219,10 @@ For every subtask, Claude Code will:
   - Special situation prompts
   - Quality checkpoint prompts
   - Git strategy guidance
+- **[docs/HAIKU_EXECUTABLE_PLANS.md](docs/HAIKU_EXECUTABLE_PLANS.md)** - Guide to writing plans that simpler models can execute
+  - What makes a plan "Haiku-executable"
+  - Recommended subtask structure
+  - Before/after examples
 
 ### Example Artifacts
 
