@@ -53,6 +53,8 @@ Before starting autonomous execution:
 
 ## Quick Start
 
+All commands below use your project's executor agent (e.g., `@taskflow-executor`) to execute the plan. Replace `{project}-executor` with your actual agent name.
+
 ### Option 1: Execute a Single Subtask
 
 Run one subtask autonomously:
@@ -61,7 +63,7 @@ Run one subtask autonomously:
 cd ~/projects/my-project
 
 claude --dangerously-skip-permissions \
-  "Read CLAUDE.md and DEVELOPMENT_PLAN.md, then execute subtask 0.1.2 using the executor agent protocol. Verify, implement, test, and commit."
+  "Use the {project}-executor agent to execute subtask 0.1.2. Verify prerequisites, implement deliverables, run tests, and commit."
 ```
 
 ### Option 2: Execute an Entire Task
@@ -72,7 +74,7 @@ Run all subtasks in a task (e.g., Task 1.2 with subtasks 1.2.1, 1.2.2, 1.2.3):
 cd ~/projects/my-project
 
 claude --dangerously-skip-permissions \
-  "Read CLAUDE.md and DEVELOPMENT_PLAN.md, then execute all subtasks in Task 1.2 sequentially. For each subtask: verify prerequisites, implement deliverables, run tests, and commit. Continue until Task 1.2 is complete."
+  "Use the {project}-executor agent to execute all subtasks in Task 1.2 sequentially. For each subtask: verify prerequisites, implement deliverables, run tests, and commit. Continue until Task 1.2 is complete."
 ```
 
 ### Option 3: Execute an Entire Phase
@@ -83,18 +85,18 @@ Run all tasks in a phase:
 cd ~/projects/my-project
 
 claude --dangerously-skip-permissions \
-  "Read CLAUDE.md and DEVELOPMENT_PLAN.md, then execute all tasks in Phase 1 sequentially. For each task, create the feature branch, execute all subtasks with commits, then merge to main when complete. Continue until Phase 1 is done."
+  "Use the {project}-executor agent to execute all tasks in Phase 1 sequentially. For each task, create the feature branch, execute all subtasks with commits, then merge to main when complete. Continue until Phase 1 is done."
 ```
 
 ### Option 4: Build the Entire Project
 
-Let Claude build everything:
+Let the executor agent build everything:
 
 ```bash
 cd ~/projects/my-project
 
 claude --dangerously-skip-permissions \
-  "Read CLAUDE.md and DEVELOPMENT_PLAN.md, then execute the entire development plan from the current progress point. Follow git discipline (one branch per task, commits per subtask, merge when task complete). Run verification after each subtask. Continue until all phases are complete."
+  "Use the {project}-executor agent to execute the entire development plan from the current progress point. Follow git discipline (one branch per task, commits per subtask, merge when task complete). Run verification after each subtask. Continue until all phases are complete."
 ```
 
 ---
@@ -131,7 +133,7 @@ Once the foundation is solid, switch to autonomous mode for the development phas
 
 ```bash
 claude --dangerously-skip-permissions \
-  "Execute Phase 1 of DEVELOPMENT_PLAN.md completely. For each task: create feature branch, execute all subtasks with verification and commits, merge to main when done."
+  "Use the {project}-executor agent to execute Phase 1 completely. For each task: create feature branch, execute all subtasks with verification and commits, merge to main when done."
 ```
 
 ### Step 4: Review and Continue
@@ -210,7 +212,7 @@ To resume after stopping:
 
 ```bash
 claude --dangerously-skip-permissions \
-  "Read DEVELOPMENT_PLAN.md and find the last completed subtask. Resume from the next incomplete subtask."
+  "Use the {project}-executor agent to find the last completed subtask in DEVELOPMENT_PLAN.md and resume from the next incomplete subtask."
 ```
 
 ---
@@ -241,7 +243,7 @@ If Claude encounters merge conflicts:
 
 1. Stop autonomous execution
 2. Resolve conflicts manually: `git status`, edit files, `git add`, `git commit`
-3. Resume: `claude --dangerously-skip-permissions "Continue with the development plan"`
+3. Resume: `claude --dangerously-skip-permissions "Use the {project}-executor agent to continue with the development plan"`
 
 ### Context Gets Too Long
 
@@ -295,9 +297,9 @@ claude
 # > "Execute all subtasks in Phase 0"
 # > exit
 
-# 5. Execute remaining phases autonomously
+# 5. Execute remaining phases autonomously using the executor agent
 claude --dangerously-skip-permissions \
-  "Read CLAUDE.md and DEVELOPMENT_PLAN.md. Execute all remaining phases (1 through completion). For each task: create feature branch, execute subtasks with verification and commits, merge when complete. Continue until the project is fully built."
+  "Use the taskflow-executor agent to execute all remaining phases (1 through completion). For each task: create feature branch, execute subtasks with verification and commits, merge when complete. Continue until the project is fully built."
 
 # 6. Review the result
 git log --oneline

@@ -391,17 +391,17 @@ The flag is called "dangerously" for a reason - it bypasses safety prompts. For 
 ### Quick Example
 
 ```bash
-# Execute a single subtask autonomously
+# Execute a single subtask autonomously (replace {project} with your project name)
 claude --dangerously-skip-permissions \
-  "Execute subtask 1.2.3 following CLAUDE.md and DEVELOPMENT_PLAN.md"
+  "Use the {project}-executor agent to execute subtask 1.2.3"
 
 # Execute an entire phase
 claude --dangerously-skip-permissions \
-  "Execute all tasks in Phase 1. For each task: create feature branch, complete all subtasks with commits, merge when done."
+  "Use the {project}-executor agent to execute all tasks in Phase 1. For each task: create feature branch, complete all subtasks with commits, merge when done."
 
 # Build the entire project
 claude --dangerously-skip-permissions \
-  "Execute the entire DEVELOPMENT_PLAN.md from current progress. Follow git discipline throughout."
+  "Use the {project}-executor agent to execute the entire development plan from current progress. Follow git discipline throughout."
 ```
 
 ### Recommended Workflow
