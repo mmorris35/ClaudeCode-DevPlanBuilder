@@ -37,10 +37,10 @@ Claude Code will generate:
 
 ### Step 4: Build Your Product
 
-Use this simple prompt for every work session:
+Use this simple prompt for every work session (replace `{project}` with your project name):
 
 ```
-please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for context, I know it will eat tokens and take time), then continue with [X.Y.Z], following all of the development plan and claude.md rules.
+Use the {project}-executor agent to execute subtask [X.Y.Z]
 ```
 
 Replace `[X.Y.Z]` with the next subtask number (like `0.1.1`, `1.2.3`, etc.)
@@ -236,19 +236,19 @@ For every subtask, Claude Code will:
 
 ### Quick Reference
 
-**Standard session prompt** (use this every time):
+**Standard session prompt** (use this every time, replacing `{project}` with your project name):
 ```
-please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for context, I know it will eat tokens and take time), then continue with [X.Y.Z], following all of the development plan and claude.md rules.
+Use the {project}-executor agent to execute subtask [X.Y.Z]
 ```
 
 **When a subtask is too large:**
 ```
-Subtask [X.Y.Z] seems too large for a single session. Please break it down into 2-3 smaller subtasks that each take 2-4 hours, have 3-7 deliverables, and can be completed independently.
+Use the {project}-executor agent to break down subtask [X.Y.Z] into 2-3 smaller subtasks that each take 2-4 hours, have 3-7 deliverables, and can be completed independently.
 ```
 
 **Progress validation:**
 ```
-We've completed Phase [X]. Before moving to Phase [Y], please review all completion notes, verify success criteria, run tests, and provide a Phase [X] completion report.
+Use the {project}-executor agent to review Phase [X] completion: verify all completion notes, run tests, and provide a Phase [X] completion report before moving to Phase [Y].
 ```
 
 ---
@@ -343,7 +343,7 @@ You: [Git commit - your plan is ready!]
 
 ### Session 2: Foundation (2-4 hours)
 ```
-You: please re-read claude.md and DEVELOPMENT_PLAN.md, then continue with 0.1.1
+You: Use the taskflow-executor agent to execute subtask 0.1.1
 
 Claude: [Completes subtask 0.1.1]
         [Runs tests, linting, type checking]
@@ -352,7 +352,7 @@ Claude: [Completes subtask 0.1.1]
 
 You: [Reviews] Looks good!
 
-You: please re-read claude.md and DEVELOPMENT_PLAN.md, then continue with 0.1.2
+You: Use the taskflow-executor agent to execute subtask 0.1.2
 
 Claude: [Completes subtask 0.1.2]
 ...
@@ -360,7 +360,7 @@ Claude: [Completes subtask 0.1.2]
 
 ### Sessions 3-N: Development (2-4 hours each)
 ```
-You: please re-read claude.md and DEVELOPMENT_PLAN.md, then continue with [next ID]
+You: Use the taskflow-executor agent to execute subtask [next ID]
 
 Claude: [Completes subtask]
 You: [Reviews, commits, moves to next]
