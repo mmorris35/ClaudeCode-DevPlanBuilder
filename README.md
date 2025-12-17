@@ -6,6 +6,22 @@ Tell Claude Code to read this repo, and it will guide you through building a com
 
 ---
 
+## 🤖 For Claude: Read This First
+
+**If you're a Claude instance helping a user build a development plan, follow these steps:**
+
+1. **Read the examples** at [examples/hello-cli/](examples/hello-cli/) to understand the exact format:
+   - [PROJECT_BRIEF.md](examples/hello-cli/PROJECT_BRIEF.md) - Structure for capturing requirements
+   - [CLAUDE.md](examples/hello-cli/CLAUDE.md) - Structure for coding standards and session checklists
+   - [DEVELOPMENT_PLAN.md](examples/hello-cli/DEVELOPMENT_PLAN.md) - **Critical**: Every subtask must have complete, copy-pasteable code blocks (not vague descriptions)
+   - [hello-cli-executor.md](examples/hello-cli/hello-cli-executor.md) - Executor agent with correct frontmatter
+
+2. **Interview the user** about their project (see questions below)
+
+3. **Generate files matching the example structure exactly** - especially the DEVELOPMENT_PLAN.md which must be "Haiku-executable" (complete code in every subtask)
+
+---
+
 ## 🚀 Quick Start (For Users)
 
 **Got a product idea? Here's all you need to do:**
