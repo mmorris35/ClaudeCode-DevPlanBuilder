@@ -354,7 +354,6 @@ For every subtask, Claude Code will:
 
 - **[examples/hello-cli/](examples/hello-cli/)** - Complete Haiku-executable example
   - PROJECT_BRIEF.md, CLAUDE.md, DEVELOPMENT_PLAN.md, executor agent
-- **[claude.md](claude.md)** - This tool's own coding standards
 
 ### Quick Reference
 
@@ -451,8 +450,8 @@ gantt
 # Install (from source for now)
 pip install -e .
 
-# Generate a development plan
-claude-planner generate my-project --brief PROJECT_BRIEF.md
+# Generate a development plan (provide your own PROJECT_BRIEF.md)
+claude-planner generate my-project --brief your-PROJECT_BRIEF.md
 
 # List available templates
 claude-planner list-templates
@@ -586,7 +585,7 @@ See **[docs/AUTONOMOUS_EXECUTION.md](docs/AUTONOMOUS_EXECUTION.md)** for the com
 
 Want to improve the methodology or the tool? Contributions welcome!
 
-This project follows its own strict development guidelines defined in [claude.md](claude.md). Each subtask must:
+This project follows strict development guidelines (see [examples/hello-cli/CLAUDE.md](examples/hello-cli/CLAUDE.md) for the pattern). Each subtask must:
 - Be completed in a single session
 - Include comprehensive tests (>80% coverage)
 - Pass all linting and type checking
