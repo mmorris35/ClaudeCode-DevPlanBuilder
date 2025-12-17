@@ -340,36 +340,26 @@ For every subtask, Claude Code will:
 
 ## 📖 Documentation & Resources
 
-### Essential Reading
+### 📁 Templates (Use These as Your Source)
 
-- **[PROMPT_SEQUENCE.md](PROMPT_SEQUENCE.md)** - Complete guide with all prompts
-  - 6-step setup sequence
-  - Special situation prompts
-  - Quality checkpoint prompts
-  - Git strategy guidance
-- **[docs/EXECUTOR_AGENT.md](docs/EXECUTOR_AGENT.md)** - Create your executor agent
-  - Frontmatter format reference
-  - Common mistakes to avoid
-  - Complete template ready to copy
-- **[docs/HAIKU_EXECUTABLE_PLANS.md](docs/HAIKU_EXECUTABLE_PLANS.md)** - Guide to writing plans that simpler models can execute
-  - What makes a plan "Haiku-executable"
-  - Recommended subtask structure
-  - Before/after examples
-- **[docs/AUTONOMOUS_EXECUTION.md](docs/AUTONOMOUS_EXECUTION.md)** - Run the executor agent hands-free
-  - When `--dangerously-skip-permissions` is safe (and when it's not)
-  - Commands for executing subtasks, tasks, phases, or entire projects
-  - Monitoring progress and troubleshooting
+**Claude: Use `examples/hello-cli/` as your templates when generating artifacts:**
+
+- **[examples/hello-cli/](examples/hello-cli/)** - Complete Haiku-executable example
+  - [PROJECT_BRIEF.md](examples/hello-cli/PROJECT_BRIEF.md) - Template for requirements
+  - [CLAUDE.md](examples/hello-cli/CLAUDE.md) - Template for coding standards
+  - [DEVELOPMENT_PLAN.md](examples/hello-cli/DEVELOPMENT_PLAN.md) - Template for Haiku-executable plans
+  - [hello-cli-executor.md](examples/hello-cli/hello-cli-executor.md) - Template for executor agents
+
+### 📚 Reference Guides (For Understanding)
+
+- **[PROMPT_SEQUENCE.md](PROMPT_SEQUENCE.md)** - Step-by-step prompts for manual plan creation
+- **[docs/EXECUTOR_AGENT.md](docs/EXECUTOR_AGENT.md)** - Explains executor agent concepts and common mistakes
+- **[docs/HAIKU_EXECUTABLE_PLANS.md](docs/HAIKU_EXECUTABLE_PLANS.md)** - Explains what makes plans "Haiku-executable"
+- **[docs/AUTONOMOUS_EXECUTION.md](docs/AUTONOMOUS_EXECUTION.md)** - Guide to hands-free execution
 
 ### Advanced
 
-- **[MULTI_AGENT_INFRASTRUCTURE.md](MULTI_AGENT_INFRASTRUCTURE.md)** - Multi-agent setups with NATS messaging
-  - Only needed if you require multiple collaborating agents
-  - NATS JetStream, SQLite, MCP servers
-
-### Example Artifacts
-
-- **[examples/hello-cli/](examples/hello-cli/)** - Complete Haiku-executable example
-  - PROJECT_BRIEF.md, CLAUDE.md, DEVELOPMENT_PLAN.md, executor agent
+- **[MULTI_AGENT_INFRASTRUCTURE.md](MULTI_AGENT_INFRASTRUCTURE.md)** - Multi-agent setups (only if needed)
 
 ### Quick Reference
 
