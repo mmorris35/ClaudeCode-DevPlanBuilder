@@ -87,6 +87,28 @@ Task 1.2: User Authentication
 - **Multiple commits per task** (one for each subtask)
 - **Merge when task complete** (not after each subtask)
 
+### ✅ Task Complete Checkpoints
+
+Every task in your DEVELOPMENT_PLAN.md ends with an explicit merge checkpoint:
+
+```markdown
+### ✅ Task X.Y Complete - Squash Merge to Main
+
+**When all subtasks (X.Y.1, X.Y.2, ...) are complete:**
+
+git push -u origin feature/X-Y-description
+gh pr create --title "type: description" --body "Task X.Y complete"
+gh pr merge --squash --delete-branch
+
+**Checklist:**
+- [ ] All subtasks complete
+- [ ] All tests pass
+- [ ] PR created and squash merged to main
+- [ ] Feature branch deleted
+```
+
+This ensures you never forget the merge step - it's explicit in the plan, not something you need to remember.
+
 ### 🤖 The Executor Agent
 
 Each project gets a specialized agent file at `.claude/agents/{project-name}-executor.md`. This agent:

@@ -311,6 +311,10 @@ async def devplan_generate_plan(params: GeneratePlanInput) -> str:
     - 3-7 specific deliverables per subtask
     - Prerequisites and success criteria
     - Git workflow guidance (task-level branching)
+    - Task Complete checkpoints with squash merge instructions
+
+    IMPORTANT: Every task ends with a "Task X.Y Complete - Squash Merge to Main"
+    checkpoint section containing PR commands and a completion checklist.
 
     Args:
         params: GeneratePlanInput containing:
@@ -328,8 +332,11 @@ async def devplan_generate_plan(params: GeneratePlanInput) -> str:
 ## Phase 0: Foundation
 
 ### Task 0.1: Project Setup
-**Branch**: `feature/0-1-setup`
-**Commit Prefix**: `[0.1]`
+
+**Git Strategy:**
+- **Branch**: `feature/0-1-setup` (from `main`)
+- **Commit Prefix**: `chore`
+- **Merge**: Squash when task complete
 
 #### Subtask 0.1.1: Initialize Repository
 - [ ] Create repository structure
@@ -339,6 +346,24 @@ async def devplan_generate_plan(params: GeneratePlanInput) -> str:
 - [ ] Create .gitignore
 
 **Success Criteria**: `pip install -e .` succeeds
+
+---
+
+### ✅ Task 0.1 Complete - Squash Merge to Main
+
+**When all subtasks (0.1.1) are complete:**
+
+```bash
+git push -u origin feature/0-1-setup
+gh pr create --title "chore: project setup" --body "Task 0.1 complete"
+gh pr merge --squash --delete-branch
+```
+
+**Checklist:**
+- [ ] All subtasks complete
+- [ ] All tests pass
+- [ ] PR created and squash merged to main
+- [ ] Feature branch deleted
 
 ---
 
@@ -629,7 +654,8 @@ async def devplan_validate_plan(params: ValidatePlanInput) -> str:
     - Subtasks have 3-7 deliverables
     - Prerequisites reference valid subtask IDs
     - Success criteria are defined
-    - Git strategy is specified
+    - Git strategy is specified for each task
+    - Task Complete checkpoint sections exist after each task
 
     Args:
         params: ValidatePlanInput containing:
@@ -646,17 +672,38 @@ async def devplan_validate_plan(params: ValidatePlanInput) -> str:
 
 ## Summary
 - Errors: 0
-- Warnings: 2
+- Warnings: 3
 - Suggestions: 3
 
 ## Warnings
 1. Subtask 1.2.3 has 8 deliverables (recommended: 3-7)
 2. Phase 3 has no estimated duration
+3. Task 2.1 is missing "Task Complete - Squash Merge" checkpoint section
 
 ## Suggestions
 1. Consider adding more detail to success criteria in Task 2.1
 2. Subtask 0.1.1 could be split into smaller pieces
 3. Add completion notes template to all subtasks
+
+## Required Structure
+
+Every task MUST end with a merge checkpoint:
+
+```markdown
+### ✅ Task X.Y Complete - Squash Merge to Main
+
+**When all subtasks (X.Y.1, X.Y.2, ...) are complete:**
+
+git push -u origin feature/X-Y-description
+gh pr create --title "type: description" --body "Task X.Y complete"
+gh pr merge --squash --delete-branch
+
+**Checklist:**
+- [ ] All subtasks complete
+- [ ] All tests pass
+- [ ] PR created and squash merged to main
+- [ ] Feature branch deleted
+```
 
 ---
 

@@ -262,6 +262,8 @@ VALIDATION CHECKLIST:
    - [ ] Each task has a Git Strategy (branch name, commit prefix, merge strategy)
    - [ ] Branch names follow pattern: `feature/X-Y-description`
    - [ ] Each subtask ends with a commit to the task branch
+   - [ ] **Every task ends with a "Task X.Y Complete - Squash Merge" checkpoint section**
+   - [ ] Merge checkpoint includes: PR commands, squash merge, checklist
    - [ ] Pre-commit hooks are set up early (Phase 0)
    - [ ] CI/CD pipeline is configured early
 

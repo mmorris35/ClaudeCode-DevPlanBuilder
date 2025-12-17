@@ -131,6 +131,11 @@ please re-read claude.md and DEVELOPMENT_PLAN.md (the entire documents, for cont
 
 ### Task 0.1: Repository Setup
 
+**Git Strategy:**
+- **Branch**: `feature/0-1-repository-setup` (from `main`)
+- **Commit Prefix**: `chore`
+- **Merge**: Squash when task complete
+
 **Subtask 0.1.1: Initialize Git Repository (Single Session)**
 
 **Prerequisites**: None
@@ -294,7 +299,33 @@ dev = [
 
 ---
 
+### ✅ Task 0.1 Complete - Squash Merge to Main
+
+**When all subtasks (0.1.1, 0.1.2, 0.1.3) are complete:**
+
+```bash
+# Push feature branch and create PR
+git push -u origin feature/0-1-repository-setup
+gh pr create --title "chore: repository setup and package structure" --body "Task 0.1 complete - repository initialization, package structure, and dependencies"
+
+# Squash merge to main
+gh pr merge --squash --delete-branch
+```
+
+**Checklist:**
+- [x] All subtasks complete (0.1.1, 0.1.2, 0.1.3)
+- [x] All tests pass
+- [x] PR created and squash merged to main
+- [x] Feature branch deleted
+
+---
+
 ### Task 0.2: Development Tools
+
+**Git Strategy:**
+- **Branch**: `feature/0-2-development-tools` (from `main`)
+- **Commit Prefix**: `chore`
+- **Merge**: Squash when task complete
 
 **Subtask 0.2.1: Pre-commit Hooks (Single Session)**
 
@@ -397,11 +428,37 @@ dev = [
 
 ---
 
+### ✅ Task 0.2 Complete - Squash Merge to Main
+
+**When all subtasks (0.2.1, 0.2.2) are complete:**
+
+```bash
+# Push feature branch and create PR
+git push -u origin feature/0-2-development-tools
+gh pr create --title "chore: pre-commit hooks and CI/CD pipeline" --body "Task 0.2 complete - development tooling setup"
+
+# Squash merge to main
+gh pr merge --squash --delete-branch
+```
+
+**Checklist:**
+- [x] All subtasks complete (0.2.1, 0.2.2)
+- [x] All tests pass
+- [x] PR created and squash merged to main
+- [x] Feature branch deleted
+
+---
+
 ## Phase 1: Core Data Models (Week 1, Days 2-3)
 
 **Goal**: Define core data structures for representing project briefs and plans
 
 ### Task 1.1: Project Data Models
+
+**Git Strategy:**
+- **Branch**: `feature/1-1-project-data-models` (from `main`)
+- **Commit Prefix**: `feat`
+- **Merge**: Squash when task complete
 
 **Subtask 1.1.1: ProjectBrief Dataclass (Single Session)**
 
@@ -594,7 +651,33 @@ dev = [
 
 ---
 
+### ✅ Task 1.1 Complete - Squash Merge to Main
+
+**When all subtasks (1.1.1, 1.1.2, 1.1.3) are complete:**
+
+```bash
+# Push feature branch and create PR
+git push -u origin feature/1-1-project-data-models
+gh pr create --title "feat: core data models for project planning" --body "Task 1.1 complete - ProjectBrief, Phase, Task, Subtask, and TechStack models"
+
+# Squash merge to main
+gh pr merge --squash --delete-branch
+```
+
+**Checklist:**
+- [x] All subtasks complete (1.1.1, 1.1.2, 1.1.3)
+- [x] All tests pass
+- [x] PR created and squash merged to main
+- [x] Feature branch deleted
+
+---
+
 ### Task 1.2: Cross-Model Validation
+
+**Git Strategy:**
+- **Branch**: `feature/1-2-cross-model-validation` (from `main`)
+- **Commit Prefix**: `feat`
+- **Merge**: Squash when task complete
 
 **Subtask 1.2.1: Model Validation (Single Session)**
 
@@ -665,6 +748,27 @@ dev = [
     - Cross-model prerequisite validation
     - Circular dependency detection
   All data models complete! Phase 1 finished.
+
+---
+
+### ✅ Task 1.2 Complete - Squash Merge to Main
+
+**When all subtasks (1.2.1) are complete:**
+
+```bash
+# Push feature branch and create PR
+git push -u origin feature/1-2-cross-model-validation
+gh pr create --title "feat: cross-model validation and DevelopmentPlan" --body "Task 1.2 complete - DevelopmentPlan model with prerequisite and circular dependency validation"
+
+# Squash merge to main
+gh pr merge --squash --delete-branch
+```
+
+**Checklist:**
+- [x] All subtasks complete (1.2.1)
+- [x] All tests pass
+- [x] PR created and squash merged to main
+- [x] Feature branch deleted
 
 ---
 
@@ -2996,6 +3100,64 @@ For MVP, validation is lenient and provides warnings rather than errors for empt
 | Phase 9 | 10 | Distribution | [ ] |
 
 **Total**: 2 weeks (10 days)
+
+---
+
+## Git Workflow Summary
+
+### Branch Strategy
+
+| Level | Branch Pattern | Example |
+|-------|---------------|---------|
+| Main | `main` | Production-ready code |
+| Feature | `feature/{phase}-{task}-description` | `feature/1-2-user-auth` |
+
+### Workflow Per Task
+
+1. **Start Task X.Y** → Create branch `feature/X-Y-description`
+2. **Complete Subtask X.Y.1** → Commit to branch
+3. **Complete Subtask X.Y.2** → Commit to branch
+4. **Complete Subtask X.Y.N** → Commit to branch
+5. **Task Complete** → Squash merge to main, delete branch
+
+### Task Complete Checkpoint
+
+**Every task ends with an explicit merge checkpoint section:**
+
+```markdown
+### ✅ Task X.Y Complete - Squash Merge to Main
+
+**When all subtasks (X.Y.1, X.Y.2, ...) are complete:**
+
+git push -u origin feature/X-Y-description
+gh pr create --title "type: description" --body "Task X.Y complete"
+gh pr merge --squash --delete-branch
+
+**Checklist:**
+- [ ] All subtasks complete
+- [ ] All tests pass
+- [ ] PR created and squash merged to main
+- [ ] Feature branch deleted
+```
+
+### Commit Message Format
+
+```
+type(scope): description
+
+- Change 1
+- Change 2
+```
+
+**Types**: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
+
+### Rules
+
+- ❌ **Never** create a branch per subtask
+- ❌ **Never** commit broken code
+- ❌ **Never** force push to main
+- ✅ **Always** run tests before committing
+- ✅ **Always** squash merge at task completion
 
 ---
 
