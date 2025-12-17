@@ -189,9 +189,14 @@ This repository contains:
 
 ### Example Artifacts (What You'll Get)
 
-- **[claude.md](claude.md)** - Example rules document for a Python CLI project
-- **[DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md)** - Example development plan with 100+ subtasks
-- Templates, generators, and validators (this is a working tool!)
+The **[examples/hello-cli/](examples/hello-cli/)** directory contains a complete, minimal example showing exactly what Claude Code generates:
+
+- **[PROJECT_BRIEF.md](examples/hello-cli/PROJECT_BRIEF.md)** - Your requirements in structured format
+- **[CLAUDE.md](examples/hello-cli/CLAUDE.md)** - Coding standards and session checklist
+- **[DEVELOPMENT_PLAN.md](examples/hello-cli/DEVELOPMENT_PLAN.md)** - **Haiku-executable** plan with complete code blocks
+- **[hello-cli-executor.md](examples/hello-cli/hello-cli-executor.md)** - Specialized executor agent
+
+This example demonstrates the key principle: **every subtask contains copy-pasteable code**, not vague descriptions. Claude Haiku can execute these plans mechanically.
 
 ---
 
@@ -348,9 +353,10 @@ For every subtask, Claude Code will:
 
 ### Example Artifacts
 
-- **[PROJECT_BRIEF.md](PROJECT_BRIEF.md)** - See a complete project brief
-- **[claude.md](claude.md)** - See project rules in action
-- **[DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md)** - See a real development plan
+- **[examples/hello-cli/](examples/hello-cli/)** - Complete Haiku-executable example
+  - PROJECT_BRIEF.md, CLAUDE.md, DEVELOPMENT_PLAN.md, executor agent
+- **[PROJECT_BRIEF.md](PROJECT_BRIEF.md)** - This tool's own project brief (larger scale example)
+- **[claude.md](claude.md)** - This tool's own coding standards
 
 ### Quick Reference
 
@@ -625,8 +631,8 @@ Go read the README at https://github.com/mmorris35/ClaudeCode-DevPlanBuilder and
 ## ❓ Questions?
 
 - 📖 **Read**: [PROMPT_SEQUENCE.md](PROMPT_SEQUENCE.md) for detailed guidance
-- 👀 **See**: [PROJECT_BRIEF.md](PROJECT_BRIEF.md) for an example
-- 🔍 **Check**: [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) for a real plan
+- 👀 **See**: [examples/hello-cli/](examples/hello-cli/) for a complete Haiku-executable example
+- 🔍 **Learn**: [docs/HAIKU_EXECUTABLE_PLANS.md](docs/HAIKU_EXECUTABLE_PLANS.md) for writing better plans
 - 💬 **Ask**: Open an issue at https://github.com/mmorris35/ClaudeCode-DevPlanBuilder/issues
 
 ---

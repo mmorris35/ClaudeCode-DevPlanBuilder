@@ -609,4 +609,19 @@ tests/models/test_user.py::TestUserModel::test_email_unique_constraint PASSED
 
 ---
 
+---
+
+## Complete Example
+
+See **[examples/hello-cli/](../examples/hello-cli/)** for a complete, minimal Haiku-executable example:
+
+- `PROJECT_BRIEF.md` - Simple CLI requirements
+- `CLAUDE.md` - Coding standards
+- `DEVELOPMENT_PLAN.md` - **Full Haiku-executable plan** with complete code blocks
+- `hello-cli-executor.md` - Executor agent
+
+This example demonstrates every principle in this guide.
+
+---
+
 *This guide was created based on lessons learned from building development plans targeting Claude Haiku execution.*
