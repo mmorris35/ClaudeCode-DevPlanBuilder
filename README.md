@@ -184,7 +184,6 @@ This repository contains:
 ### For Users (You!)
 
 - **[PROMPT_SEQUENCE.md](PROMPT_SEQUENCE.md)** - Detailed guide with all the prompts you'll need
-- **[PROJECT_BRIEF.md](PROJECT_BRIEF.md)** - Example of a complete project brief (for this tool itself!)
 - **This README** - Everything you need to get started
 
 ### Example Artifacts (What You'll Get)
@@ -355,7 +354,6 @@ For every subtask, Claude Code will:
 
 - **[examples/hello-cli/](examples/hello-cli/)** - Complete Haiku-executable example
   - PROJECT_BRIEF.md, CLAUDE.md, DEVELOPMENT_PLAN.md, executor agent
-- **[PROJECT_BRIEF.md](PROJECT_BRIEF.md)** - This tool's own project brief (larger scale example)
 - **[claude.md](claude.md)** - This tool's own coding standards
 
 ### Quick Reference
