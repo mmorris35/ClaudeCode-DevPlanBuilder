@@ -74,18 +74,21 @@ Your development plan will have:
 
 **IMPORTANT**: Branches are created at the **TASK** level, NOT the subtask level!
 
-```
-Task 1.2: User Authentication
-├── Branch: feature/1-2-user-auth (created once for the task)
-├── Subtask 1.2.1 → commit to branch
-├── Subtask 1.2.2 → commit to branch
-├── Subtask 1.2.3 → commit to branch
-└── Task complete → squash merge to main
+```mermaid
+gitGraph
+   commit id: "main"
+   branch feature/1.2-user-auth
+   checkout feature/1.2-user-auth
+   commit id: "1.2.1: models"
+   commit id: "1.2.2: routes"
+   commit id: "1.2.3: tests"
+   checkout main
+   merge feature/1.2-user-auth id: "squash merge" type: HIGHLIGHT
 ```
 
-- **One branch per task** (e.g., `feature/1-2-user-auth`)
+- **One branch per task** (e.g., `feature/1.2-user-auth`)
 - **Multiple commits per task** (one for each subtask)
-- **Merge when task complete** (not after each subtask)
+- **Squash merge when task complete** (not after each subtask)
 
 ### ✅ Task Complete Checkpoints
 
@@ -196,6 +199,20 @@ This repository contains:
 
 When you ask Claude Code to help you develop your idea, it will:
 
+```mermaid
+flowchart LR
+    A[Your Idea] --> B[Interview]
+    B --> C[PROJECT_BRIEF.md]
+    C --> D[CLAUDE.md]
+    D --> E[DEVELOPMENT_PLAN.md]
+    E --> F[Executor Agent]
+    F --> G[Execute Subtasks]
+    G --> H[Working Product]
+
+    style A fill:#f9f,stroke:#333
+    style H fill:#9f9,stroke:#333
+```
+
 ### 1. **Interview You** About Your Project
 
 Claude will ask clarifying questions like:
@@ -214,7 +231,7 @@ A comprehensive document covering:
 - Quality requirements (performance, security, scalability)
 - Success criteria
 
-### 3. **Generate claude.md**
+### 3. **Generate CLAUDE.md**
 
 Project-specific rules defining:
 - How Claude Code should work on YOUR project
@@ -250,8 +267,30 @@ A specialized agent file at `.claude/agents/{project-name}-executor.md` that:
 
 ### 6. **Guide You Through Execution**
 
+```mermaid
+flowchart TD
+    A[Start Subtask] --> B[Read CLAUDE.md + DEVELOPMENT_PLAN.md]
+    B --> C[Verify Prerequisites]
+    C --> D{Prerequisites Met?}
+    D -->|No| E[Stop & Report]
+    D -->|Yes| F[Implement Deliverables]
+    F --> G[Write Tests]
+    G --> H[Run Verification]
+    H --> I{All Pass?}
+    I -->|No| J[Fix Issues]
+    J --> H
+    I -->|Yes| K[Update DEVELOPMENT_PLAN.md]
+    K --> L[Git Commit]
+    L --> M{Last Subtask in Task?}
+    M -->|No| N[Next Subtask]
+    M -->|Yes| O[Squash Merge to Main]
+
+    style A fill:#f9f,stroke:#333
+    style O fill:#9f9,stroke:#333
+```
+
 For every subtask, Claude Code will:
-- Read the full context (claude.md + DEVELOPMENT_PLAN.md)
+- Read the full context (CLAUDE.md + DEVELOPMENT_PLAN.md)
 - Implement all deliverables
 - Write comprehensive tests
 - Run quality checks (linting, type checking)
@@ -337,62 +376,87 @@ Use the {project}-executor agent to review Phase [X] completion: verify all comp
 This is **both**:
 
 1. **A methodology** for building development plans with Claude Code
-   ✅ **READY TO USE** - The prompt sequences and examples are complete and battle-tested
+   ✅ **READY TO USE** - The prompt sequences and examples are battle-tested
 
-2. **A working CLI tool** (in active development) that automates the plan generation
-   🚧 **IN PROGRESS** - Currently at Phase 5 (CLI Commands)
+2. **A working CLI tool** that automates plan generation
+   ✅ **USABLE** - Core features complete, validation/distribution in progress
 
-The tool is being built using its own generated development plan - eating our own dog food! 🎉
+The tool was built using its own generated development plan - eating our own dog food! 🎉
 
 ### Development Roadmap
 
 **The CLI Tool Progress:**
 
+```mermaid
+gantt
+    title DevPlan Builder Progress
+    dateFormat X
+    axisFormat %s
+
+    section Core
+    Foundation       :done, 0, 1
+    Data Models      :done, 1, 2
+    Parser           :done, 2, 3
+    Templates        :done, 3, 4
+    Generators       :done, 4, 5
+    CLI Commands     :done, 5, 6
+
+    section Polish
+    Validation       :active, 6, 7
+    Git Integration  :7, 8
+    Testing & Docs   :8, 9
+    Distribution     :9, 10
+```
+
 | Phase | Status | Description |
 |-------|--------|-------------|
-| **Phase 0: Foundation** | ✅ **COMPLETE** | Repo setup, package structure, pre-commit hooks, CI/CD pipeline |
-| **Phase 1: Data Models** | ✅ **COMPLETE** | ProjectBrief, Phase/Task/Subtask models, TechStack, validation |
-| **Phase 2: Parser** | ✅ **COMPLETE** | Markdown parser, field extractor, ProjectBrief converter |
-| **Phase 3: Templates** | ✅ **COMPLETE** | Template selector, Jinja2 renderer, Web App/API/CLI templates |
-| **Phase 4: Generators** | ✅ **COMPLETE** | Tech stack, phase, task, subtask generators + integration |
-| **Phase 5: CLI Commands** | 🚧 **IN PROGRESS** | CLI entry point complete, working on generate/validate/list commands |
-| **Phase 6: Validation** | ⏳ **PLANNED** | Validation rules engine, subtask/plan validators, reporting |
-| **Phase 7: Git Integration** | ⏳ **PLANNED** | Repository initialization, initial commit creation |
-| **Phase 8: Testing & Docs** | ⏳ **PLANNED** | Integration tests, end-to-end tests, comprehensive documentation |
-| **Phase 9: Distribution** | ⏳ **PLANNED** | Package configuration, PyPI publishing |
-| **Phase 10: Dogfooding** | ⏳ **PLANNED** | Generate example plans, iterate based on real usage |
-
-**Currently Working On:** Subtask 5.1.1 - CLI Entry Point ✅ Complete!
-**Next Up:** Subtask 5.1.2 - Generate Command (integrates parser + generator + renderer)
+| **Phase 0: Foundation** | ✅ Complete | Repo setup, package structure, pre-commit hooks, CI/CD |
+| **Phase 1: Data Models** | ✅ Complete | ProjectBrief, Phase/Task/Subtask models, TechStack |
+| **Phase 2: Parser** | ✅ Complete | Markdown parser, field extractor, ProjectBrief converter |
+| **Phase 3: Templates** | ✅ Complete | Template selector, Jinja2 renderer, project-type templates |
+| **Phase 4: Generators** | ✅ Complete | Tech stack, phase, task, subtask generators |
+| **Phase 5: CLI Commands** | ✅ Complete | `claude-planner generate`, `validate`, `list-templates` |
+| **Phase 6: Validation** | 🚧 In Progress | Validation rules engine, comprehensive reporting |
+| **Phase 7: Git Integration** | ⏳ Planned | Repository initialization, initial commit creation |
+| **Phase 8: Testing & Docs** | ⏳ Planned | Integration tests, end-to-end tests |
+| **Phase 9: Distribution** | ⏳ Planned | PyPI publishing |
 
 ### What Works Right Now
 
 ✅ **The Methodology** - Use PROMPT_SEQUENCE.md to build dev plans for ANY project
-✅ **Data Models** - Complete ProjectBrief and DevelopmentPlan structures
-✅ **Parser** - Extract requirements from PROJECT_BRIEF.md
-✅ **Templates** - Jinja2 templates for claude.md and DEVELOPMENT_PLAN.md
-✅ **Generators** - Create minimal structures (tech stack, phases, tasks, subtasks)
-✅ **CLI Framework** - Basic `claude-planner` command with --help, --version, --verbose
+✅ **CLI Tool** - `claude-planner generate`, `validate`, `list-templates`
+✅ **MCP Server** - DevPlan tools for Claude Code integration
+✅ **Executor Agents** - Haiku-powered agents that execute your plans
+✅ **Autonomous Mode** - Build entire projects hands-free
 
 ### What's Coming
 
-🚧 **Generate Command** - `claude-planner generate my-project --brief PROJECT_BRIEF.md`
-🚧 **Validate Command** - `claude-planner validate DEVELOPMENT_PLAN.md`
-🚧 **List Templates** - `claude-planner list-templates`
+🚧 **Enhanced Validation** - Deeper quality checks and error reporting
 🚧 **Git Integration** - Automatic repository initialization
-🚧 **Full Validation** - Quality checks and error reporting
+🚧 **PyPI Distribution** - `pip install claude-planner`
 
 ### How to Use It Today
 
-**Option 1: Use the Methodology** (✅ Ready Now)
+**Option 1: Use the Methodology** (Recommended)
 - Follow [PROMPT_SEQUENCE.md](PROMPT_SEQUENCE.md)
 - Let Claude Code guide you through building your development plan
 - Works for any project, any tech stack
 
-**Option 2: Wait for the CLI Tool** (🚧 Coming Soon)
-- The automated tool will make it even easier
-- Watch this repo for updates
-- Expected completion: Following the development plan phases above
+**Option 2: Use the CLI Tool**
+```bash
+# Install (from source for now)
+pip install -e .
+
+# Generate a development plan
+claude-planner generate my-project --brief PROJECT_BRIEF.md
+
+# List available templates
+claude-planner list-templates
+```
+
+**Option 3: Use the MCP Server**
+- Add the DevPlan MCP server to Claude Code
+- Use tools like `devplan_generate_plan`, `devplan_generate_agent`
 
 ---
 
