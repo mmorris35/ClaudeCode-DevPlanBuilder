@@ -285,14 +285,77 @@ git commit -m "type(scope): description
 
 ### Phase G: Task Completion (if last subtask)
 
-When ALL subtasks in a task are complete:
+**CRITICAL: DO NOT STOP after the final subtask commit!**
 
+When you complete the LAST subtask of a task, you MUST execute this full workflow:
+
+#### Step G.1: Verify Task is Complete
 ```bash
-# Squash merge to main
+# Check all subtasks in DEVELOPMENT_PLAN.md are marked [x]
+grep -A 20 "Task X.Y" DEVELOPMENT_PLAN.md | grep "\[ \]"
+# Should return nothing (no unchecked boxes)
+```
+
+#### Step G.2: Run Final Verification
+```bash
+{{ lint_command | default('ruff check src tests') }}
+{{ type_check_command | default('mypy src') }}
+{{ test_command_all | default('pytest tests/ -v --cov --cov-report=term-missing') }}
+```
+
+#### Step G.3: Push Feature Branch
+```bash
+git push -u origin feature/X.Y-description
+```
+
+#### Step G.4: Squash Merge to Main
+```bash
 git checkout main
+git pull origin main
 git merge --squash feature/X.Y-description
-git commit -m "feat(scope): comprehensive task description"
+git commit -m "feat(scope): comprehensive task description
+
+- Summary of what the task accomplished
+- Key features added
+- Tests: X tests total"
+git push origin main
+```
+
+#### Step G.5: Clean Up Feature Branch
+```bash
 git branch -D feature/X.Y-description
+git push origin --delete feature/X.Y-description
+```
+
+#### Step G.6: Update DEVELOPMENT_PLAN.md
+Find the "Task X.Y Complete - Squash Merge" checklist and mark all items:
+```markdown
+**Checklist:**
+- [x] All subtasks complete
+- [x] All tests pass
+- [x] PR created and squash merged to main
+- [x] Feature branch deleted
+```
+
+#### Step G.7: Report Task Completion
+```
+## Task X.Y Complete ✅
+
+**Subtasks Completed:**
+- X.Y.1: [description]
+- X.Y.2: [description]
+- X.Y.3: [description]
+
+**Verification:**
+- All tests pass
+- Coverage: X%
+- Lint/typecheck: pass
+
+**Git:**
+- Merged to main: `abc1234`
+- Feature branch deleted
+
+**Next:** Task X.Z or Phase Complete
 ```
 
 ---

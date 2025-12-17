@@ -290,6 +290,52 @@ git add .
 git commit -m "type(scope): description"
 ```
 
+### Phase F: Task Completion (if last subtask)
+
+**CRITICAL: DO NOT STOP after the final subtask commit!**
+
+When you complete the LAST subtask of a task, execute this full workflow:
+
+#### F.1: Verify Task is Complete
+Check all subtasks in DEVELOPMENT_PLAN.md are marked `[x]`.
+
+#### F.2: Push Feature Branch
+```bash
+git push -u origin feature/X.Y-description
+```
+
+#### F.3: Squash Merge to Main
+```bash
+git checkout main
+git pull origin main
+git merge --squash feature/X.Y-description
+git commit -m "feat(scope): comprehensive task description"
+git push origin main
+```
+
+#### F.4: Clean Up Feature Branch
+```bash
+git branch -D feature/X.Y-description
+git push origin --delete feature/X.Y-description
+```
+
+#### F.5: Update DEVELOPMENT_PLAN.md
+Mark all items in "Task X.Y Complete - Squash Merge" checklist:
+- [x] All subtasks complete
+- [x] All tests pass
+- [x] PR created and squash merged to main
+- [x] Feature branch deleted
+
+#### F.6: Report Task Completion
+```
+## Task X.Y Complete ✅
+
+**Subtasks:** X.Y.1, X.Y.2, X.Y.3 all complete
+**Verification:** All tests pass
+**Git:** Merged to main `abc1234`, branch deleted
+**Next:** Task X.Z or Phase Complete
+```
+
 ---
 
 ## GIT DISCIPLINE (MANDATORY)
@@ -298,22 +344,22 @@ git commit -m "type(scope): description"
 |-----------|--------|
 | Starting Task X.1 first subtask | `git checkout -b feature/X.1-description` |
 | Continuing Task X.1 | Stay on `feature/X.1-description` |
-| Completing Task X.1 last subtask | Squash merge to main, delete branch |
+| Completing Task X.1 last subtask | **Full merge workflow (Phase F above)** |
 
 ### NEVER Do These
 - Commit broken code
 - Skip verification steps
 - Force push to main
 - Create branch per subtask (only per task!)
+- **Stop after final subtask commit without merging**
 
 ---
 
 ## OUTPUT FORMAT
 
-When complete, report:
-
+### For Subtask Completion:
 ```
-## Subtask X.Y.Z Complete
+## Subtask X.Y.Z Complete ✅
 
 **Implemented:** [List of what was done]
 **Files Created:** [paths]
@@ -323,6 +369,16 @@ When complete, report:
 **Next:** Subtask X.Y.Z+1 or Task Complete
 ```
 
+### For Task Completion:
+```
+## Task X.Y Complete ✅
+
+**Subtasks:** X.Y.1, X.Y.2, X.Y.3 all complete
+**Verification:** All tests pass, X% coverage
+**Git:** Merged to main `abc1234`, branch deleted
+**Next:** Task X.Z or Phase Complete
+```
+
 ---
 
 ## REMEMBER
@@ -330,8 +386,9 @@ When complete, report:
 1. Complete ENTIRE subtask in ONE session
 2. Cross-check prerequisites exist in code
 3. Match existing project patterns exactly
-4. Every session ends with a commit
-5. If blocked, document and report
+4. Every subtask ends with a commit
+5. **Every task ends with a merge to main**
+6. If blocked, document and report
 ```
 
 ---
