@@ -2,6 +2,8 @@
 
 > **Purpose**: This document provides a step-by-step prompt sequence to work with Claude Code to build a comprehensive, paint-by-numbers development plan with all best practices, testing requirements, git discipline, and validation.
 
+> **📁 See Examples**: For complete examples of PROJECT_BRIEF.md, CLAUDE.md, DEVELOPMENT_PLAN.md, and executor agents, see **[examples/hello-cli/](examples/hello-cli/)**.
+
 ---
 
 ## ⚠️ CRITICAL: Git Workflow is at the TASK Level
