@@ -1,16 +1,20 @@
-# Agent Infrastructure Documentation
+# Multi-Agent Infrastructure Documentation
+
+> **ADVANCED** - For multi-agent setups with NATS messaging and inter-agent communication.
+>
+> **Looking for basic executor agents?** See [docs/EXECUTOR_AGENT.md](docs/EXECUTOR_AGENT.md) instead.
 
 **Version:** 1.0
 **Last Updated:** 2025-12-07
-**Project:** Sequel Security Posture Assessor (whag-1)
+**Origin:** Sequel Security Posture Assessor (whag-1)
 
-This document describes the custom agent system, NATS-based inter-agent communication, and persistent memory infrastructure used in this project. It provides everything needed to port this infrastructure to other projects.
+This document describes a **multi-agent architecture** using NATS-based inter-agent communication and persistent memory. This is an advanced setup for projects requiring multiple collaborating agents. Most DevPlan projects only need a single executor agent - see [docs/EXECUTOR_AGENT.md](docs/EXECUTOR_AGENT.md) for that.
 
 ---
 
 ## How to Use This Document
 
-This document is **self-contained**. You can read ONLY this document and recreate the entire agent infrastructure in a new project by copy-pasting the complete file contents provided below.
+This document is **self-contained**. You can read ONLY this document and recreate the entire multi-agent infrastructure in a new project by copy-pasting the complete file contents provided below.
 
 **Contents:**
 1. Architecture overview

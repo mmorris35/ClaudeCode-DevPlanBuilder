@@ -284,10 +284,14 @@ For every subtask, Claude Code will:
 ### Essential Reading
 
 - **[PROMPT_SEQUENCE.md](PROMPT_SEQUENCE.md)** - Complete guide with all prompts
-  - 5-step setup sequence
+  - 6-step setup sequence
   - Special situation prompts
   - Quality checkpoint prompts
   - Git strategy guidance
+- **[docs/EXECUTOR_AGENT.md](docs/EXECUTOR_AGENT.md)** - Create your executor agent
+  - Frontmatter format reference
+  - Common mistakes to avoid
+  - Complete template ready to copy
 - **[docs/HAIKU_EXECUTABLE_PLANS.md](docs/HAIKU_EXECUTABLE_PLANS.md)** - Guide to writing plans that simpler models can execute
   - What makes a plan "Haiku-executable"
   - Recommended subtask structure
@@ -296,6 +300,12 @@ For every subtask, Claude Code will:
   - When `--dangerously-skip-permissions` is safe (and when it's not)
   - Commands for executing subtasks, tasks, phases, or entire projects
   - Monitoring progress and troubleshooting
+
+### Advanced
+
+- **[MULTI_AGENT_INFRASTRUCTURE.md](MULTI_AGENT_INFRASTRUCTURE.md)** - Multi-agent setups with NATS messaging
+  - Only needed if you require multiple collaborating agents
+  - NATS JetStream, SQLite, MCP servers
 
 ### Example Artifacts
 
