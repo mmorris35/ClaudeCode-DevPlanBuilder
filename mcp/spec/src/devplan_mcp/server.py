@@ -489,7 +489,7 @@ async def devplan_generate_agent(params: GenerateAgentInput) -> str:
 name: {slug}-executor
 description: {desc}
 tools: Read, Write, Edit, Bash, Glob, Grep
-model: sonnet
+model: haiku
 ---
 
 # {params.project_name} Development Plan Executor
@@ -636,6 +636,18 @@ When complete, report:
 """
 
 
+class ValidateAgentInput(BaseModel):
+    """Input for validating a Claude Code agent file."""
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    content: str = Field(
+        ...,
+        description="The full content of an agent .md file to validate",
+        min_length=50,
+    )
+
+
 @mcp.tool(
     name="devplan_validate_plan",
     annotations={
@@ -709,6 +721,146 @@ gh pr merge --squash --delete-branch
 
 *Validation placeholder - full implementation pending*
 """
+
+
+@mcp.tool(
+    name="devplan_validate_agent",
+    annotations={
+        "title": "Validate Executor Agent",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    },
+)
+async def devplan_validate_agent(params: ValidateAgentInput) -> str:
+    """Validate a Claude Code executor agent file for correct frontmatter format.
+
+    Checks for common mistakes:
+    - Missing YAML frontmatter delimiters (---)
+    - tools field as YAML list instead of comma-separated string
+    - model field set to "sonnet" instead of "haiku"
+    - Missing required fields (name, description, tools, model)
+    - Multi-line description field
+
+    Args:
+        params: ValidateAgentInput containing:
+            - content (str): Agent .md file content
+
+    Returns:
+        str: Validation report with errors and correct format examples
+    """
+    import re
+
+    logger.info("Validating agent file...")
+
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    content = params.content
+
+    # Check for frontmatter delimiters
+    if not content.startswith("---"):
+        errors.append("Missing opening frontmatter delimiter (---)")
+
+    # Find frontmatter section
+    frontmatter_match = re.match(r"^---\n(.*?)\n---", content, re.DOTALL)
+    if not frontmatter_match:
+        errors.append("Could not parse YAML frontmatter. Ensure format is:\n---\nkey: value\n---")
+    else:
+        frontmatter = frontmatter_match.group(1)
+
+        # Check for required fields
+        if "name:" not in frontmatter:
+            errors.append("Missing required field: name")
+        if "description:" not in frontmatter:
+            errors.append("Missing required field: description")
+        if "tools:" not in frontmatter:
+            errors.append("Missing required field: tools")
+        if "model:" not in frontmatter:
+            errors.append("Missing required field: model")
+
+        # Check for YAML list format for tools (common mistake)
+        if re.search(r"tools:\s*\n\s+-", frontmatter):
+            errors.append(
+                "tools field is a YAML list but MUST be a comma-separated string.\n"
+                "  ❌ Wrong:\n"
+                "     tools:\n"
+                "       - Read\n"
+                "       - Write\n"
+                "  ✅ Correct:\n"
+                "     tools: Read, Write, Edit, Bash, Glob, Grep"
+            )
+
+        # Check for wrong model
+        model_match = re.search(r"model:\s*(\w+)", frontmatter)
+        if model_match:
+            model = model_match.group(1).lower()
+            if model == "sonnet":
+                errors.append(
+                    "model is 'sonnet' but MUST be 'haiku'.\n"
+                    "  Using sonnet defeats the purpose of having an executor agent.\n"
+                    "  The executor should be lightweight (haiku) since plans are Haiku-executable."
+                )
+            elif model not in ("haiku", "opus"):
+                warnings.append(f"Unusual model '{model}'. Expected 'haiku' for executor agents.")
+
+        # Check for multi-line description
+        desc_match = re.search(r"description:\s*(.+?)(?=\n\w+:|$)", frontmatter, re.DOTALL)
+        if desc_match:
+            desc = desc_match.group(1)
+            if "\n" in desc.strip():
+                warnings.append("description field spans multiple lines. Should be a single line.")
+
+    # Build report
+    status = "❌ INVALID" if errors else ("⚠️ WARNINGS" if warnings else "✅ VALID")
+
+    report = f"""# Agent Validation Report
+
+## Status: {status}
+
+"""
+
+    if errors:
+        report += "## Errors\n\n"
+        for i, error in enumerate(errors, 1):
+            report += f"{i}. {error}\n\n"
+
+    if warnings:
+        report += "## Warnings\n\n"
+        for i, warning in enumerate(warnings, 1):
+            report += f"{i}. {warning}\n\n"
+
+    if not errors and not warnings:
+        report += "No issues found. Agent frontmatter is correctly formatted.\n\n"
+
+    # Build correct format example (split for line length)
+    example_desc = (
+        "PROACTIVELY use this agent to execute ProjectName development "
+        'subtasks. Invoke with "execute subtask X.Y.Z".'
+    )
+    report += f"""---
+
+## Correct Agent Frontmatter Format
+
+```yaml
+---
+name: project-slug-executor
+description: {example_desc}
+tools: Read, Write, Edit, Bash, Glob, Grep
+model: haiku
+---
+```
+
+**Key Rules:**
+1. Frontmatter MUST be between `---` delimiters
+2. `tools` MUST be a comma-separated string (NOT a YAML list)
+3. `model` MUST be `haiku` (NOT `sonnet`)
+4. `description` MUST be on a single line
+5. `name` should be lowercase with hyphens
+"""
+
+    return report
 
 
 @mcp.tool(

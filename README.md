@@ -125,6 +125,53 @@ Each project gets a specialized agent file at `.claude/agents/{project-name}-exe
 
 The agent will read your planning documents, verify prerequisites, implement the deliverables, run verification, and commit the changes.
 
+### ⚠️ Common Mistakes with Executor Agents
+
+Claude sometimes makes errors when creating executor agent files. Watch for these:
+
+**❌ Wrong - YAML list for tools:**
+```yaml
+tools:
+  - Read
+  - Write
+  - Edit
+```
+
+**✅ Correct - Comma-separated string:**
+```yaml
+tools: Read, Write, Edit, Bash, Glob, Grep
+```
+
+**❌ Wrong - Using sonnet model:**
+```yaml
+model: sonnet
+```
+
+**✅ Correct - Using haiku model:**
+```yaml
+model: haiku
+```
+
+Using `sonnet` defeats the purpose of having an executor agent. The agent should be lightweight (`haiku`) since the development plans are designed to be "Haiku-executable" - containing complete, copy-pasteable code that doesn't require inference.
+
+**❌ Wrong - Missing frontmatter delimiters:**
+```yaml
+name: my-executor
+tools: Read, Write
+```
+
+**✅ Correct - With delimiters:**
+```yaml
+---
+name: my-executor
+description: PROACTIVELY use this agent to execute...
+tools: Read, Write, Edit, Bash, Glob, Grep
+model: haiku
+---
+```
+
+The MCP server includes a `devplan_validate_agent` tool that checks for these common mistakes.
+
 ---
 
 ## 📚 What's In This Repo?

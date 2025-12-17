@@ -280,7 +280,85 @@ Please review the plan and fix any issues. Show me what changes you made and why
 
 ---
 
-### Step 4: Add Detailed Subtask Templates (Optional but Recommended)
+### Step 4: Create Executor Agent
+
+**Create the executor agent file that Claude Code will use to execute your plan:**
+
+```
+Create an executor agent file for my project at .claude/agents/[PROJECT_SLUG]-executor.md
+
+The agent file MUST have this exact YAML frontmatter format:
+
+---
+name: [project-slug]-executor
+description: PROACTIVELY use this agent to execute [PROJECT_NAME] development subtasks. Expert at DEVELOPMENT_PLAN.md execution with cross-checking, git discipline, and verification. Invoke with "execute subtask X.Y.Z" to complete a subtask entirely in one session.
+tools: Read, Write, Edit, Bash, Glob, Grep
+model: haiku
+---
+
+CRITICAL FORMATTING RULES:
+1. The frontmatter MUST be between --- delimiters
+2. The "tools" field MUST be a comma-separated string (NOT a YAML list)
+3. The "model" field MUST be "haiku" (NOT "sonnet" - using sonnet defeats the purpose of having an executor agent)
+4. The "description" field MUST be on a single line
+5. The "name" field should be lowercase with hyphens (e.g., "taskflow-executor")
+
+The agent body should include:
+- Project context (what it builds, tech stack, directory structure)
+- Mandatory initialization sequence (read CLAUDE.md, DEVELOPMENT_PLAN.md, PROJECT_BRIEF.md)
+- Execution protocol (implement → test → verify → commit)
+- Git discipline rules (one branch per task, squash merge when complete)
+- Output format for reporting completion
+
+Save the file to: .claude/agents/[project-slug]-executor.md
+```
+
+**Common Mistakes to Avoid:**
+
+❌ **Wrong - YAML list for tools:**
+```yaml
+tools:
+  - Read
+  - Write
+  - Edit
+```
+
+✅ **Correct - Comma-separated string:**
+```yaml
+tools: Read, Write, Edit, Bash, Glob, Grep
+```
+
+❌ **Wrong - Using sonnet model:**
+```yaml
+model: sonnet
+```
+
+✅ **Correct - Using haiku model:**
+```yaml
+model: haiku
+```
+
+❌ **Wrong - Missing frontmatter delimiters:**
+```yaml
+name: my-executor
+tools: Read, Write
+```
+
+✅ **Correct - With delimiters:**
+```yaml
+---
+name: my-executor
+description: ...
+tools: Read, Write, Edit, Bash, Glob, Grep
+model: haiku
+---
+```
+
+**Deliverable**: An executor agent file at `.claude/agents/{project-slug}-executor.md` with correct frontmatter.
+
+---
+
+### Step 5: Add Detailed Subtask Templates (Optional but Recommended)
 
 **For any subtask that needs more detail, use this prompt:**
 
@@ -317,7 +395,7 @@ Keep it concise but actionable. This should help Claude Code complete the subtas
 
 ---
 
-### Step 5: Generate Phase 0 (Foundation) Immediately
+### Step 6: Generate Phase 0 (Foundation) Immediately
 
 **Copy this prompt to get started:**
 
