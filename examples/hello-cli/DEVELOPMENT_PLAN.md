@@ -177,6 +177,28 @@ python -c "from hello_cli import __version__; print(__version__)"
 
 ### Task 1.1 Complete - Squash Merge
 
+**When all subtasks (1.1.1, 1.1.2) are complete, execute:**
+
+```bash
+# Push feature branch
+git push -u origin feature/1.1-project-init
+
+# Switch to main and merge
+git checkout main
+git pull origin main
+git merge --squash feature/1.1-project-init
+git commit -m "feat(setup): initialize project structure
+
+- Add pyproject.toml with dependencies
+- Create src/hello_cli package structure
+- Add tests directory"
+git push origin main
+
+# Delete feature branch
+git branch -d feature/1.1-project-init
+git push origin --delete feature/1.1-project-init
+```
+
 **Checklist:**
 - [ ] All subtasks complete (1.1.1, 1.1.2)
 - [ ] All verification passes
@@ -242,6 +264,27 @@ python -c "from hello_cli import __version__; print('OK')"
 ---
 
 ### Task 1.2 Complete - Squash Merge
+
+**When all subtasks (1.2.1) are complete, execute:**
+
+```bash
+# Push feature branch
+git push -u origin feature/1.2-install-verify
+
+# Switch to main and merge
+git checkout main
+git pull origin main
+git merge --squash feature/1.2-install-verify
+git commit -m "chore(setup): install and verify dev dependencies
+
+- Install package in editable mode
+- Verify ruff, mypy, pytest work"
+git push origin main
+
+# Delete feature branch
+git branch -d feature/1.2-install-verify
+git push origin --delete feature/1.2-install-verify
+```
 
 **Checklist:**
 - [ ] All subtasks complete (1.2.1)
@@ -426,6 +469,29 @@ pytest tests/ -v --cov=hello_cli --cov-report=term-missing
 
 ### Task 2.1 Complete - Squash Merge
 
+**When all subtasks (2.1.1) are complete, execute:**
+
+```bash
+# Push feature branch
+git push -u origin feature/2.1-core-cli
+
+# Switch to main and merge
+git checkout main
+git pull origin main
+git merge --squash feature/2.1-core-cli
+git commit -m "feat(cli): implement greeting command
+
+- Add click-based CLI with name argument
+- Add --color flag for Rich output
+- Add --version and --help flags
+- 8 tests, 100% coverage"
+git push origin main
+
+# Delete feature branch
+git branch -d feature/2.1-core-cli
+git push origin --delete feature/2.1-core-cli
+```
+
 **Checklist:**
 - [ ] All subtasks complete (2.1.1)
 - [ ] All tests pass with 100% coverage
@@ -494,6 +560,28 @@ pytest tests/ -v --cov=hello_cli --cov-report=term-missing --cov-fail-under=100
 ---
 
 ### Task 2.2 Complete - Squash Merge
+
+**When all subtasks (2.2.1) are complete, execute:**
+
+```bash
+# Push feature branch
+git push -u origin feature/2.2-final-verify
+
+# Switch to main and merge
+git checkout main
+git pull origin main
+git merge --squash feature/2.2-final-verify
+git commit -m "test(cli): complete end-to-end verification
+
+- Verify all CLI commands work
+- Confirm 100% test coverage
+- All quality checks pass"
+git push origin main
+
+# Delete feature branch
+git branch -d feature/2.2-final-verify
+git push origin --delete feature/2.2-final-verify
+```
 
 **Checklist:**
 - [ ] All subtasks complete (2.2.1)
