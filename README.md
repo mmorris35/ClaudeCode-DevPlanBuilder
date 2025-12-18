@@ -14,11 +14,14 @@ Tell Claude Code to read this repo, and it will guide you through building a com
    - [PROJECT_BRIEF.md](examples/hello-cli/PROJECT_BRIEF.md) - Structure for capturing requirements
    - [CLAUDE.md](examples/hello-cli/CLAUDE.md) - Structure for coding standards and session checklists
    - [DEVELOPMENT_PLAN.md](examples/hello-cli/DEVELOPMENT_PLAN.md) - **Critical**: Every subtask must have complete, copy-pasteable code blocks (not vague descriptions)
-   - [hello-cli-executor.md](examples/hello-cli/hello-cli-executor.md) - Executor agent with correct frontmatter
+   - [hello-cli-executor.md](examples/hello-cli/hello-cli-executor.md) - Executor agent (haiku) for building
+   - [hello-cli-verifier.md](examples/hello-cli/hello-cli-verifier.md) - Verifier agent (sonnet) for QA
 
 2. **Interview the user** about their project (see questions below)
 
 3. **Generate files matching the example structure exactly** - especially the DEVELOPMENT_PLAN.md which must be "Haiku-executable" (complete code in every subtask)
+
+4. **Create both agents** - executor (haiku) for building, verifier (sonnet) for validating the result
 
 ---
 
@@ -49,7 +52,8 @@ Claude Code will generate:
 - ✅ **CLAUDE.md** - Rules for how Claude Code should work on your project
 - ✅ **PROJECT_BRIEF.md** - Your requirements captured in a structured format
 - ✅ **DEVELOPMENT_PLAN.md** - Paint-by-numbers roadmap with numbered subtasks
-- ✅ **`.claude/agents/{project}-executor.md`** - Specialized agent to execute your plan
+- ✅ **`.claude/agents/{project}-executor.md`** - Specialized agent to execute your plan (haiku)
+- ✅ **`.claude/agents/{project}-verifier.md`** - QA agent to validate the completed app (sonnet)
 
 ### Step 4: Build Your Product
 
@@ -67,6 +71,21 @@ Replace `[X.Y.Z]` with the next subtask number (like `0.1.1`, `1.2.3`, etc.)
 - Run linting and type checking
 - Commit to the task's feature branch (NOT create a new branch per subtask)
 - Update progress in DEVELOPMENT_PLAN.md
+
+### Step 5: Verify Your Product
+
+After all subtasks are complete, validate the application:
+
+```
+Use the {project}-verifier agent to validate the application against PROJECT_BRIEF.md
+```
+
+The verifier agent (sonnet) will:
+- **Smoke test** the application
+- **Verify each feature** against requirements
+- **Test edge cases** the plan may have missed
+- **Check error handling** and security basics
+- **Produce a verification report** with pass/fail status
 
 ---
 
@@ -204,14 +223,23 @@ This repository contains:
 
 ### Example Artifacts (What You'll Get)
 
-The **[examples/hello-cli/](examples/hello-cli/)** directory contains a complete, minimal example showing exactly what Claude Code generates:
+The **[examples/](examples/)** directory contains complete, minimal examples for different project types:
 
-- **[PROJECT_BRIEF.md](examples/hello-cli/PROJECT_BRIEF.md)** - Your requirements in structured format
-- **[CLAUDE.md](examples/hello-cli/CLAUDE.md)** - Coding standards and session checklist
-- **[DEVELOPMENT_PLAN.md](examples/hello-cli/DEVELOPMENT_PLAN.md)** - **Haiku-executable** plan with complete code blocks
-- **[hello-cli-executor.md](examples/hello-cli/hello-cli-executor.md)** - Specialized executor agent
+| Example | Type | Tech Stack | Description |
+|---------|------|------------|-------------|
+| **[hello-cli/](examples/hello-cli/)** | CLI | Python, Click, Rich | Minimal greeting CLI (start here!) |
+| **[todo-api/](examples/todo-api/)** | API | Python, FastAPI, SQLAlchemy | REST API with CRUD endpoints |
+| **[user-dashboard/](examples/user-dashboard/)** | Web App | Next.js, TypeScript, Tailwind | Dashboard with theme toggle |
+| **[data-validator/](examples/data-validator/)** | Library | Python, pytest | Zero-dependency validation library |
 
-This example demonstrates the key principle: **every subtask contains copy-pasteable code**, not vague descriptions. Claude Haiku can execute these plans mechanically.
+Each example includes:
+- **PROJECT_BRIEF.md** - Requirements in structured format
+- **CLAUDE.md** - Coding standards and session checklist
+- **DEVELOPMENT_PLAN.md** - **Haiku-executable** plan with complete code blocks
+- **{project}-executor.md** - Executor agent (haiku) for building
+- **{project}-verifier.md** - Verifier agent (sonnet) for QA
+
+These examples demonstrate the key principle: **every subtask contains copy-pasteable code**, not vague descriptions. Claude Haiku can execute these plans mechanically, then Claude Sonnet can verify the result.
 
 ---
 
@@ -342,20 +370,31 @@ For every subtask, Claude Code will:
 
 ### 📁 Templates (Use These as Your Source)
 
-**Claude: Use `examples/hello-cli/` as your templates when generating artifacts:**
+**Claude: Use the examples folder as templates when generating artifacts. Choose based on project type:**
 
-- **[examples/hello-cli/](examples/hello-cli/)** - Complete Haiku-executable example
-  - [PROJECT_BRIEF.md](examples/hello-cli/PROJECT_BRIEF.md) - Template for requirements
-  - [CLAUDE.md](examples/hello-cli/CLAUDE.md) - Template for coding standards
-  - [DEVELOPMENT_PLAN.md](examples/hello-cli/DEVELOPMENT_PLAN.md) - Template for Haiku-executable plans
-  - [hello-cli-executor.md](examples/hello-cli/hello-cli-executor.md) - Template for executor agents
+| Project Type | Example to Use |
+|-------------|----------------|
+| CLI Tool | [examples/hello-cli/](examples/hello-cli/) |
+| REST API | [examples/todo-api/](examples/todo-api/) |
+| Web App | [examples/user-dashboard/](examples/user-dashboard/) |
+| Library | [examples/data-validator/](examples/data-validator/) |
+
+Each example contains:
+- `PROJECT_BRIEF.md` - Template for requirements
+- `CLAUDE.md` - Template for coding standards
+- `DEVELOPMENT_PLAN.md` - Template for Haiku-executable plans
+- `{project}-executor.md` - Template for executor agents (haiku)
+- `{project}-verifier.md` - Template for verifier agents (sonnet)
 
 ### 📚 Reference Guides (For Understanding)
 
 - **[PROMPT_SEQUENCE.md](PROMPT_SEQUENCE.md)** - Step-by-step prompts for manual plan creation
 - **[docs/EXECUTOR_AGENT.md](docs/EXECUTOR_AGENT.md)** - Explains executor agent concepts and common mistakes
+- **[docs/VERIFIER_AGENT.md](docs/VERIFIER_AGENT.md)** - Explains verifier agent for post-build QA
 - **[docs/HAIKU_EXECUTABLE_PLANS.md](docs/HAIKU_EXECUTABLE_PLANS.md)** - Explains what makes plans "Haiku-executable"
 - **[docs/AUTONOMOUS_EXECUTION.md](docs/AUTONOMOUS_EXECUTION.md)** - Guide to hands-free execution
+- **[docs/BEST_PRACTICES.md](docs/BEST_PRACTICES.md)** - Anti-patterns and best practices for development plans
+- **[docs/ERROR_RECOVERY.md](docs/ERROR_RECOVERY.md)** - What to do when things go wrong
 
 ### Advanced
 
@@ -562,6 +601,12 @@ claude --dangerously-skip-permissions \
 2. **Execute Phase 0 interactively** - Set up foundation with your oversight
 3. **Switch to autonomous for development phases** - Let Claude build while you grab coffee
 4. **Review between phases** - Check git history, run tests, verify progress
+5. **Run verification** - Use the verifier agent to validate against requirements
+
+```bash
+# After autonomous build completes, verify the result
+claude "Use the {project}-verifier agent to validate against PROJECT_BRIEF.md"
+```
 
 See **[docs/AUTONOMOUS_EXECUTION.md](docs/AUTONOMOUS_EXECUTION.md)** for the complete guide including safety checklists, troubleshooting, and monitoring tips.
 
@@ -634,8 +679,9 @@ Go read the README at https://github.com/mmorris35/ClaudeCode-DevPlanBuilder and
 ## ❓ Questions?
 
 - 📖 **Read**: [PROMPT_SEQUENCE.md](PROMPT_SEQUENCE.md) for detailed guidance
-- 👀 **See**: [examples/hello-cli/](examples/hello-cli/) for a complete Haiku-executable example
+- 👀 **See**: [examples/](examples/) for complete Haiku-executable examples (CLI, API, Web App, Library)
 - 🔍 **Learn**: [docs/HAIKU_EXECUTABLE_PLANS.md](docs/HAIKU_EXECUTABLE_PLANS.md) for writing better plans
+- ⚠️ **Avoid**: [docs/BEST_PRACTICES.md](docs/BEST_PRACTICES.md) for common anti-patterns
 - 💬 **Ask**: Open an issue at https://github.com/mmorris35/ClaudeCode-DevPlanBuilder/issues
 
 ---
