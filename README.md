@@ -17,11 +17,13 @@ Tell Claude Code to read this repo, and it will guide you through building a com
    - [hello-cli-executor.md](examples/hello-cli/hello-cli-executor.md) - Executor agent (haiku) for building
    - [hello-cli-verifier.md](examples/hello-cli/hello-cli-verifier.md) - Verifier agent (sonnet) for QA
 
-2. **Interview the user** about their project (see questions below)
+2. **Read [examples/GLOBAL_LESSONS.md](examples/GLOBAL_LESSONS.md)** - Community-learned patterns to incorporate into plans based on project type
 
-3. **Generate files matching the example structure exactly** - especially the DEVELOPMENT_PLAN.md which must be "Haiku-executable" (complete code in every subtask)
+3. **Interview the user** about their project (see questions below)
 
-4. **Create both agents** - executor (haiku) for building, verifier (sonnet) for validating the result
+4. **Generate files matching the example structure exactly** - especially the DEVELOPMENT_PLAN.md which must be "Haiku-executable" (complete code in every subtask). Incorporate relevant patterns from GLOBAL_LESSONS.md.
+
+5. **Create both agents** - executor (haiku) for building, verifier (sonnet) for validating the result
 
 ---
 
@@ -395,6 +397,12 @@ Each example contains:
 - **[docs/AUTONOMOUS_EXECUTION.md](docs/AUTONOMOUS_EXECUTION.md)** - Guide to hands-free execution
 - **[docs/BEST_PRACTICES.md](docs/BEST_PRACTICES.md)** - Anti-patterns and best practices for development plans
 - **[docs/ERROR_RECOVERY.md](docs/ERROR_RECOVERY.md)** - What to do when things go wrong
+- **[docs/LESSONS_LEARNED.md](docs/LESSONS_LEARNED.md)** - How the feedback loop works
+
+### Community Learning
+
+- **[examples/GLOBAL_LESSONS.md](examples/GLOBAL_LESSONS.md)** - Patterns from verification failures (read by plan generator)
+- **[Submit a lesson](https://github.com/mmorris35/ClaudeCode-DevPlanBuilder/issues/new?labels=lesson-learned)** - Share patterns to help future plans
 
 ### Advanced
 

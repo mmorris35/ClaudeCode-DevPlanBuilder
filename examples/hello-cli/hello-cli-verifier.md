@@ -185,3 +185,72 @@ After testing, produce a report in this format:
 - You don't approve your own fixes
 
 Your output is a verification report that helps the user decide if the application is ready.
+
+## Capture Lessons Learned
+
+After producing the verification report, if any issues were found:
+
+### 1. Append to Local LESSONS_LEARNED.md
+
+```bash
+# Create if doesn't exist
+if [ ! -f LESSONS_LEARNED.md ]; then
+  echo "# Lessons Learned" > LESSONS_LEARNED.md
+  echo "" >> LESSONS_LEARNED.md
+fi
+```
+
+For each issue found, append:
+
+```markdown
+## YYYY-MM-DD: {Short Title}
+
+- **Issue**: {What the verifier found}
+- **Root Cause**: {Why - was plan wrong? Missing edge case?}
+- **Fix**: {How it was resolved}
+- **Pattern**: {Generalized lesson for future plans}
+- **Applies To**: cli
+
+---
+```
+
+### 2. Report to DevPlanBuilder (Optional, Opt-in)
+
+If the lesson is generalizable (not project-specific), offer to share it:
+
+```
+Would you like to share this lesson with the DevPlanBuilder community?
+This helps improve future plan generation for everyone.
+```
+
+If yes:
+
+```bash
+gh issue create \
+  --repo mmorris35/ClaudeCode-DevPlanBuilder \
+  --title "Lesson: {short title}" \
+  --label "lesson-learned,cli" \
+  --body "## Pattern
+{generalized pattern}
+
+## Implementation
+{how to implement the fix}
+
+## Test
+{how to verify it's fixed}
+
+## Project Type
+cli"
+```
+
+### What Makes a Good Lesson
+
+**Share if:**
+- Pattern applies to other CLI projects
+- Not specific to your business logic
+- Would have prevented the issue if known earlier
+
+**Don't share:**
+- Project-specific bugs
+- Contains proprietary information
+- Already covered in GLOBAL_LESSONS.md
