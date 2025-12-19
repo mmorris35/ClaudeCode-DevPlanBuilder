@@ -6,24 +6,186 @@ Tell Claude Code to read this repo, and it will guide you through building a com
 
 ---
 
-## 🤖 For Claude: Read This First
+## 🤖 For Claude Code
 
-**If you're a Claude instance helping a user build a development plan, follow these steps:**
+When a user asks you to help them create a development plan using this methodology, follow these exact steps:
 
-1. **Read the examples** at [examples/hello-cli/](examples/hello-cli/) to understand the exact format:
-   - [PROJECT_BRIEF.md](examples/hello-cli/PROJECT_BRIEF.md) - Structure for capturing requirements
-   - [CLAUDE.md](examples/hello-cli/CLAUDE.md) - Structure for coding standards and session checklists
-   - [DEVELOPMENT_PLAN.md](examples/hello-cli/DEVELOPMENT_PLAN.md) - **Critical**: Every subtask must have complete, copy-pasteable code blocks (not vague descriptions)
-   - [hello-cli-executor.md](examples/hello-cli/hello-cli-executor.md) - Executor agent (haiku) for building
-   - [hello-cli-verifier.md](examples/hello-cli/hello-cli-verifier.md) - Verifier agent (sonnet) for QA
+### Step 1: Interview the User
 
-2. **Read [examples/GLOBAL_LESSONS.md](examples/GLOBAL_LESSONS.md)** - Community-learned patterns to incorporate into plans based on project type
+Ask these questions ONE AT A TIME, waiting for responses:
 
-3. **Interview the user** about their project (see questions below)
+1. "What's your project name?"
+2. "What type of project is this? (CLI tool, web app, API, or library)"
+3. "In one sentence, what does it do?"
+4. "Who will use it? (e.g., developers, end users, admins)"
+5. "What are the 3-5 must-have features for MVP?"
+6. "Any technologies you must use or cannot use?"
+7. "What's your timeline?"
+8. "Any constraints I should know about?"
 
-4. **Generate files matching the example structure exactly** - especially the DEVELOPMENT_PLAN.md which must be "Haiku-executable" (complete code in every subtask). Incorporate relevant patterns from GLOBAL_LESSONS.md.
+### Step 2: Create PROJECT_BRIEF.md
 
-5. **Create both agents** - executor (haiku) for building, verifier (sonnet) for validating the result
+Write to `PROJECT_BRIEF.md` using this structure:
+
+```markdown
+# Project Brief: {name}
+
+## Overview
+
+| Field | Value |
+|-------|-------|
+| **Project Name** | {name} |
+| **Project Type** | {cli/web_app/api/library} |
+| **Goal** | {one sentence} |
+| **Timeline** | {timeline} |
+| **Team Size** | 1 |
+
+## Target Users
+
+- {user type 1}
+- {user type 2}
+
+## Features
+
+### Must-Have (MVP)
+
+1. **{Feature Name}** - {description}
+2. **{Feature Name}** - {description}
+...
+
+### Nice-to-Have (v2)
+
+- {feature}
+...
+
+## Technical Requirements
+
+### Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Language | {language} |
+| Framework | {framework} |
+| Testing | {test framework} |
+
+### Constraints
+
+- {constraint 1}
+- {constraint 2}
+
+## Success Criteria
+
+1. {criterion 1}
+2. {criterion 2}
+...
+
+## Out of Scope
+
+- {thing 1}
+- {thing 2}
+```
+
+### Step 3: Create DEVELOPMENT_PLAN.md
+
+Structure the plan with phases, tasks, and subtasks:
+
+- **Phases** (0, 1, 2...): Major milestones
+- **Tasks** (0.1, 1.2...): Features within a phase (one git branch each)
+- **Subtasks** (0.1.1, 1.2.3...): Single-session work items (2-4 hours each)
+
+Each subtask MUST include:
+- Prerequisites (which subtasks must be done first)
+- Deliverables (checkboxes for what to build)
+- Files to Create/Modify
+- Success Criteria (testable conditions)
+- Completion Notes template
+
+**Critical**: Write complete, copy-pasteable code blocks. Claude Haiku will execute this plan - it cannot infer missing details.
+
+**Git workflow**: One branch per TASK (not subtask). Commit after each subtask. Squash merge when task completes.
+
+Add "Task Complete" section after each task's subtasks:
+
+```markdown
+### Task X.Y Complete - Squash Merge
+
+- [ ] All subtasks complete
+- [ ] All tests pass
+- [ ] Squash merge: `git checkout main && git merge --squash feature/X-Y-name`
+- [ ] Delete branch: `git branch -d feature/X-Y-name`
+```
+
+### Step 4: Create CLAUDE.md
+
+Write project rules with these sections:
+1. Project Overview
+2. Quick Reference (tech stack table)
+3. Directory Structure
+4. Commands (install, test, lint)
+5. Coding Standards
+6. Session Checklist (starting/ending)
+
+### Step 5: Create Executor Agent
+
+Write to `.claude/agents/{project}-executor.md`:
+
+```markdown
+---
+name: {project}-executor
+description: PROACTIVELY use this agent to execute {project} development subtasks.
+tools: Read, Write, Edit, Bash, Glob, Grep
+model: haiku
+---
+
+# {Project} Executor Agent
+
+## Before Starting
+1. Read CLAUDE.md completely
+2. Read DEVELOPMENT_PLAN.md completely
+3. Find the subtask you're assigned
+
+## Execution Loop
+For each deliverable checkbox:
+1. Implement the requirement
+2. Write/update tests
+3. Run tests and fix failures
+4. Mark checkbox complete
+
+## After Completion
+1. Update completion notes
+2. Commit with semantic message
+3. Report what was done
+```
+
+### Step 6: Create Verifier Agent
+
+Write to `.claude/agents/{project}-verifier.md` with `model: sonnet` - this agent validates the completed application against PROJECT_BRIEF.md and captures lessons learned.
+
+### Common Mistakes to Avoid
+
+- Don't create branches for subtasks (only for tasks)
+- Don't write vague deliverables ("implement feature") - be specific
+- Don't skip success criteria - they're how we know it's done
+- Don't forget the Task Complete section after each task
+- Don't use placeholder code - write real, complete code blocks
+
+### Execution Prompt
+
+Tell the user to execute subtasks with:
+```
+Use the {project}-executor agent to execute subtask [X.Y.Z]
+```
+
+### Reference Examples
+
+For complete examples of each file type, see [examples/hello-cli/](examples/hello-cli/):
+- [PROJECT_BRIEF.md](examples/hello-cli/PROJECT_BRIEF.md)
+- [CLAUDE.md](examples/hello-cli/CLAUDE.md)
+- [DEVELOPMENT_PLAN.md](examples/hello-cli/DEVELOPMENT_PLAN.md)
+- [hello-cli-executor.md](examples/hello-cli/hello-cli-executor.md)
+- [hello-cli-verifier.md](examples/hello-cli/hello-cli-verifier.md)
+
+Also read [examples/GLOBAL_LESSONS.md](examples/GLOBAL_LESSONS.md) for patterns to incorporate based on project type.
 
 ---
 
