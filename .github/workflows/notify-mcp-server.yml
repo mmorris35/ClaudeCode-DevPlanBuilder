@@ -9,9 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger devplan-mcp-server workflow
+        env:
+          MESSAGE: ${{ github.event.head_commit.message }}
         run: |
+          # Escape the message for JSON (handle newlines and quotes)
+          ESCAPED_MESSAGE=$(echo "$MESSAGE" | jq -Rs . | sed 's/^"//;s/"$//')
+
           curl -X POST \
             -H "Authorization: token ${{ secrets.MCP_REPO_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/mmorris35/devplan-mcp-server/dispatches \
-            -d "{\"event_type\":\"reference-repo-updated\",\"client_payload\":{\"sha\":\"${{ github.sha }}\",\"message\":\"${{ github.event.head_commit.message }}\"}}"
+            -d "{\"event_type\":\"reference-repo-updated\",\"client_payload\":{\"sha\":\"${{ github.sha }}\",\"message\":\"${ESCAPED_MESSAGE}\"}}"
