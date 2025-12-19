@@ -124,6 +124,64 @@ class GenerateAgentInput(BaseModel):
     )
 
 
+class GenerateVerifierInput(BaseModel):
+    """Input for generating a project verifier agent file."""
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    brief_content: str = Field(
+        ...,
+        description="PROJECT_BRIEF.md content OR JSON-serialized ProjectBrief",
+        min_length=50,
+    )
+    project_name: str = Field(
+        ...,
+        description="Project name (used for agent file naming)",
+        min_length=1,
+    )
+    project_type: str = Field(
+        default="cli",
+        description="Project type: 'cli', 'web_app', 'api', 'library'",
+    )
+
+
+class FormatLessonInput(BaseModel):
+    """Input for formatting a lesson learned for GitHub issue creation."""
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    title: str = Field(
+        ...,
+        description="Short descriptive title for the lesson",
+        min_length=5,
+        max_length=100,
+    )
+    issue: str = Field(
+        ...,
+        description="What went wrong / what was found",
+        min_length=10,
+    )
+    root_cause: str = Field(
+        ...,
+        description="Why it happened (plan missing edge case, wrong assumption, etc.)",
+        min_length=10,
+    )
+    fix: str = Field(
+        ...,
+        description="How it was resolved",
+        min_length=10,
+    )
+    pattern: str = Field(
+        ...,
+        description="Generalized lesson that applies to future projects",
+        min_length=10,
+    )
+    project_type: str = Field(
+        default="all",
+        description="Project type this applies to: 'cli', 'api', 'web', 'library', 'all'",
+    )
+
+
 class ValidatePlanInput(BaseModel):
     """Input for validating a DEVELOPMENT_PLAN.md file."""
 
@@ -692,6 +750,299 @@ Mark all items in "Task X.Y Complete - Squash Merge" checklist:
 """
 
 
+@mcp.tool(
+    name="devplan_generate_verifier",
+    annotations={
+        "title": "Generate Verifier Agent",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    },
+)
+async def devplan_generate_verifier(params: GenerateVerifierInput) -> str:
+    """Generate a project verifier agent file for .claude/agents/.
+
+    Creates a specialized QA agent that validates completed applications against
+    PROJECT_BRIEF.md requirements. The verifier uses sonnet (not haiku) to
+    think critically about whether the product actually works.
+
+    The verifier agent:
+    - Runs smoke tests to verify the app starts
+    - Tests each feature from PROJECT_BRIEF.md
+    - Tries adversarial/edge case inputs
+    - Produces a structured verification report
+    - Captures lessons learned for future improvement
+
+    IMPORTANT: This creates a Claude Code AGENT (in .claude/agents/), NOT a slash
+    command. Agents are invoked with "Use the {name} agent to..." syntax.
+
+    Args:
+        params: GenerateVerifierInput containing:
+            - brief_content (str): PROJECT_BRIEF.md or JSON brief
+            - project_name (str): Project name for the agent
+            - project_type (str): cli, web_app, api, or library
+
+    Returns:
+        str: Complete verifier agent markdown file content with YAML frontmatter.
+             Save this to .claude/agents/{project-slug}-verifier.md
+    """
+    import re
+
+    logger.info(f"Generating verifier agent for {params.project_name}")
+
+    # Slugify project name for filename
+    slug = params.project_name.lower()
+    slug = re.sub(r"[\s_]+", "-", slug)
+    slug = re.sub(r"[^a-z0-9-]", "", slug)
+    slug = re.sub(r"-+", "-", slug)
+    slug = slug.strip("-")
+
+    # Build type-specific verification guidance
+    verification_by_type = {
+        "cli": """### CLI-Specific Tests
+
+```bash
+# Smoke tests
+{command} --help
+{command} --version
+{command}  # default behavior
+
+# Edge cases
+{command} ""           # Empty input
+{command} "José 🎉"    # Unicode
+{command} "$(echo A | head -c 1000)"  # Long input
+```""",
+        "api": """### API-Specific Tests
+
+```bash
+# Smoke tests
+curl http://localhost:8000/health
+curl http://localhost:8000/docs
+
+# Edge cases
+curl -X POST /endpoint -d ''  # Empty body
+curl -X POST /endpoint -H "Content-Type: application/json" -d 'invalid'
+```
+
+Verify all error responses return JSON (not plain text).""",
+        "web_app": """### Web App-Specific Tests
+
+1. **Page Load**: All routes render without errors
+2. **JavaScript Console**: No errors in browser console
+3. **Hydration**: No React/Vue hydration warnings
+4. **Responsive**: Check mobile and desktop viewports
+5. **Dark Mode**: If applicable, verify theme switching""",
+        "library": """### Library-Specific Tests
+
+```python
+# Import test
+from {package} import *
+
+# Type hints
+mypy src/
+
+# Zero dependencies (if claimed)
+pip install . --no-deps && python -c "import {package}"
+```""",
+    }
+
+    type_guidance = verification_by_type.get(params.project_type, verification_by_type["cli"])
+
+    desc = (
+        f"QA engineer agent that validates {params.project_name} against "
+        "PROJECT_BRIEF.md requirements. Runs smoke tests, feature verification, "
+        "edge cases, and produces a verification report with lessons learned."
+    )
+
+    return f"""---
+name: {slug}-verifier
+description: {desc}
+tools: Read, Bash, Glob, Grep
+model: sonnet
+---
+
+# {params.project_name} Verifier Agent
+
+You are a critical QA engineer validating the {params.project_name} application.
+Your job is to verify that the completed application meets all requirements in
+PROJECT_BRIEF.md.
+
+## Your Role
+
+You **think critically** about whether the application works. You don't just run
+tests - you try to break things, find edge cases, and verify the product actually
+delivers what was promised.
+
+## Verification Protocol
+
+### Step 1: Read Requirements
+
+Read `PROJECT_BRIEF.md` to understand what was promised:
+- **Goal**: What should this application do?
+- **Features**: What specific capabilities were required?
+- **Constraints**: What rules must it follow?
+
+### Step 2: Smoke Test
+
+Verify the application runs at all. If any smoke test fails, stop and report a
+critical issue.
+
+{type_guidance}
+
+### Step 3: Feature Verification
+
+For EACH feature in PROJECT_BRIEF.md:
+1. Design a test that exercises the feature
+2. Run the test
+3. Compare actual behavior to expected
+4. Document the result
+
+### Step 4: Edge Case Testing
+
+Try inputs the plan may not have anticipated:
+- Empty/null values
+- Very long inputs
+- Special characters
+- Unicode / emoji
+- Boundary values (0, -1, max int)
+- Concurrent operations (if applicable)
+
+### Step 5: Error Handling
+
+- Invalid inputs should produce helpful error messages
+- The application should not crash on bad input
+- Check exit codes (CLI) or HTTP status codes (API)
+
+## Verification Report Format
+
+After testing, produce a report:
+
+```markdown
+# Verification Report: {params.project_name}
+
+## Summary
+- **Status**: [PASS/PARTIAL/FAIL]
+- **Features Verified**: X/Y
+- **Critical Issues**: N
+- **Warnings**: M
+
+## Smoke Tests
+- [ ] Application starts
+- [ ] Help/docs available
+- [ ] Basic operation works
+
+## Feature Verification
+
+### Feature: [Name from PROJECT_BRIEF.md]
+- **Status**: [✅/⚠️/❌]
+- **Tests Run**: [commands/actions]
+- **Result**: [what happened]
+- **Notes**: [observations]
+
+## Edge Cases
+
+| Input | Expected | Actual | Status |
+|-------|----------|--------|--------|
+| Empty | Graceful | [result] | [✅/❌] |
+| Long | Works | [result] | [✅/❌] |
+| Unicode | Display | [result] | [✅/❌] |
+
+## Issues Found
+
+### Critical (Must Fix)
+[List show-stopping bugs]
+
+### Warnings (Should Fix)
+[List non-critical issues]
+
+### Observations
+[Minor notes or suggestions]
+
+## Recommendation
+[APPROVE / APPROVE WITH RESERVATIONS / REJECT]
+
+[Explain your recommendation]
+```
+
+## Important Guidelines
+
+1. **Be adversarial** - Your job is to find problems, not confirm success
+2. **Test the actual application** - Don't just read test results, run commands
+3. **Compare to requirements** - Does it do what PROJECT_BRIEF.md promised?
+4. **Document everything** - Include exact commands and outputs
+5. **Be specific** - "It doesn't work" is not useful; exact errors are
+
+## What You Don't Do
+
+- You don't fix issues (that's the executor's job)
+- You don't modify code
+- You don't make commits
+- You don't approve your own fixes
+
+## Capture Lessons Learned
+
+After producing the verification report, if any issues were found:
+
+### 1. Append to Local LESSONS_LEARNED.md
+
+```bash
+if [ ! -f LESSONS_LEARNED.md ]; then
+  echo "# Lessons Learned" > LESSONS_LEARNED.md
+fi
+```
+
+For each issue found, append:
+
+```markdown
+## YYYY-MM-DD: {{Short Title}}
+
+- **Issue**: {{What the verifier found}}
+- **Root Cause**: {{Why - was plan wrong? Missing edge case?}}
+- **Fix**: {{How it was resolved}}
+- **Pattern**: {{Generalized lesson for future plans}}
+- **Applies To**: {params.project_type}
+
+---
+```
+
+### 2. Report to DevPlanBuilder (Optional, Opt-in)
+
+If the lesson is generalizable (not project-specific), offer to share it:
+
+```
+Would you like to share this lesson with the DevPlanBuilder community?
+This helps improve future plan generation for everyone.
+```
+
+If yes, use the `devplan_format_lesson` MCP tool to format and then:
+
+```bash
+gh issue create \\
+  --repo mmorris35/ClaudeCode-DevPlanBuilder \\
+  --title "Lesson: {{short title}}" \\
+  --label "lesson-learned,{params.project_type}" \\
+  --body "{{formatted lesson}}"
+```
+
+### What Makes a Good Lesson
+
+**Share if:**
+- Pattern applies to other {params.project_type} projects
+- Not specific to your business logic
+- Would have prevented the issue if known earlier
+
+**Don't share:**
+- Project-specific bugs
+- Contains proprietary information
+- Already covered in GLOBAL_LESSONS.md
+
+---
+
+**IMPORTANT**: Save this file to `.claude/agents/{slug}-verifier.md`
+"""
+
+
 class ValidateAgentInput(BaseModel):
     """Input for validating a Claude Code agent file."""
 
@@ -1079,6 +1430,270 @@ Subtask {params.subtask_id} marked complete.
 ---
 
 *Progress update placeholder - returns modified plan content*
+"""
+
+
+@mcp.tool(
+    name="devplan_read_global_lessons",
+    annotations={
+        "title": "Read Global Lessons",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    },
+)
+async def devplan_read_global_lessons(project_type: str | None = None) -> str:
+    """Read community-contributed lessons learned from GLOBAL_LESSONS.md.
+
+    Returns patterns from past verification failures that should be incorporated
+    into new development plans. Use this during plan generation to proactively
+    include edge cases and guards based on collective learning.
+
+    Args:
+        project_type: Optional filter by type ('cli', 'api', 'web', 'library', 'all')
+
+    Returns:
+        str: GLOBAL_LESSONS.md content, optionally filtered by project type
+    """
+    logger.info(f"Reading global lessons (filter={project_type})")
+
+    # GLOBAL_LESSONS.md content - this would ideally fetch from the repo
+    # but for MCP server simplicity, we embed the key patterns
+    lessons = """# Global Lessons Learned
+
+> Community-contributed patterns from real verification failures.
+
+---
+
+## CLI Patterns
+
+### Empty Input Handling
+- **Pattern**: Always validate/handle empty string inputs for CLI arguments
+- **Implementation**: Add guard clause `if not arg: arg = default_value`
+- **Test**: Include `cli ""` in verification commands
+
+### Unicode in Arguments
+- **Pattern**: CLI arguments may contain unicode characters (emoji, non-ASCII)
+- **Implementation**: Ensure string handling doesn't assume ASCII
+- **Test**: Include `cli "José 🎉"` in edge case tests
+
+---
+
+## API Patterns
+
+### Structured Error Responses
+- **Pattern**: All API errors should return JSON, not plain text
+- **Implementation**: Add exception handlers that return `{"error": code, "message": msg}`
+- **Test**: Verify 404/500 responses are valid JSON
+
+### Input Validation at Boundaries
+- **Pattern**: Validate all input at API boundaries, not deep in business logic
+- **Implementation**: Use Pydantic/marshmallow for request validation
+- **Test**: Send malformed JSON, missing fields, wrong types
+
+### Empty Request Bodies
+- **Pattern**: Handle empty or null request bodies gracefully
+- **Implementation**: Add explicit check before parsing
+- **Test**: `curl -X POST /endpoint -d ''`
+
+---
+
+## Web App Patterns
+
+### Hydration Mismatches
+- **Pattern**: Server-rendered HTML must match client hydration
+- **Implementation**: Use `suppressHydrationWarning` sparingly, fix root cause
+- **Test**: Check console for hydration warnings in dev mode
+
+### Dark Mode Flash
+- **Pattern**: Theme should be determined before first paint
+- **Implementation**: Read localStorage in a blocking script or use cookies
+- **Test**: Hard refresh with dark mode enabled, check for flash
+
+---
+
+## Library Patterns
+
+### Bool is Subclass of Int
+- **Pattern**: In Python, `isinstance(True, int)` is True
+- **Implementation**: Check `isinstance(x, bool)` before `isinstance(x, int)`
+- **Test**: Verify `IntValidator().is_valid(True)` returns False
+
+### Zero Dependencies Verification
+- **Pattern**: If claiming zero deps, verify imports don't pull extras
+- **Implementation**: Test import in clean venv with no extras installed
+- **Test**: `pip install . --no-deps && python -c "import mylib"`
+
+---
+
+## Universal Patterns
+
+### Test What You Ship
+- **Pattern**: Verification should test the installed package, not source
+- **Implementation**: Run tests against `pip install -e .` not raw source
+- **Test**: Verify import paths match package structure
+
+### Verification Commands Need Expected Output
+- **Pattern**: Don't just run commands, specify what success looks like
+- **Implementation**: Add `# Expected: ...` comments after each command
+- **Test**: Verifier can compare actual vs expected
+
+---
+
+For the latest lessons, see:
+https://github.com/mmorris35/ClaudeCode-DevPlanBuilder/blob/main/examples/GLOBAL_LESSONS.md
+"""
+
+    if project_type and project_type != "all":
+        # Filter to relevant sections
+        type_map = {
+            "cli": "## CLI Patterns",
+            "api": "## API Patterns",
+            "web": "## Web App Patterns",
+            "web_app": "## Web App Patterns",
+            "library": "## Library Patterns",
+        }
+
+        if project_type in type_map:
+            # Extract the header + universal patterns + specific type patterns
+            lines = lessons.split("\n")
+            result_lines = []
+            in_relevant_section = False
+            in_universal_section = False
+
+            for line in lines:
+                # Always include header
+                if line.startswith("# Global") or line.startswith(">"):
+                    result_lines.append(line)
+                # Check for section headers
+                elif line.startswith("## "):
+                    if line == type_map[project_type]:
+                        in_relevant_section = True
+                        in_universal_section = False
+                        result_lines.append("")
+                        result_lines.append(line)
+                    elif line == "## Universal Patterns":
+                        in_relevant_section = False
+                        in_universal_section = True
+                        result_lines.append("")
+                        result_lines.append(line)
+                    else:
+                        in_relevant_section = False
+                        in_universal_section = False
+                elif in_relevant_section or in_universal_section:
+                    result_lines.append(line)
+
+            return "\n".join(result_lines)
+
+    return lessons
+
+
+@mcp.tool(
+    name="devplan_format_lesson",
+    annotations={
+        "title": "Format Lesson for Reporting",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    },
+)
+async def devplan_format_lesson(params: FormatLessonInput) -> str:
+    """Format a lesson learned for submission to DevPlanBuilder via GitHub issue.
+
+    Takes structured lesson data and produces:
+    1. Formatted GitHub issue body
+    2. Ready-to-run `gh issue create` command
+    3. Local LESSONS_LEARNED.md entry
+
+    Use this after verification finds issues that would benefit the community.
+
+    Args:
+        params: FormatLessonInput containing:
+            - title (str): Short descriptive title
+            - issue (str): What went wrong
+            - root_cause (str): Why it happened
+            - fix (str): How it was resolved
+            - pattern (str): Generalized lesson
+            - project_type (str): cli, api, web, library, or all
+
+    Returns:
+        str: Formatted output with GitHub issue command and local entry
+    """
+    from datetime import datetime
+
+    logger.info(f"Formatting lesson: {params.title}")
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    # GitHub issue body
+    issue_body = f"""## Pattern
+{params.pattern}
+
+## Issue
+{params.issue}
+
+## Root Cause
+{params.root_cause}
+
+## Implementation
+{params.fix}
+
+## Test
+[How to verify this pattern is followed]
+
+## Project Type
+{params.project_type}"""
+
+    # gh command
+    gh_command = f"""gh issue create \\
+  --repo mmorris35/ClaudeCode-DevPlanBuilder \\
+  --title "Lesson: {params.title}" \\
+  --label "lesson-learned,{params.project_type}" \\
+  --body "$(cat <<'EOF'
+{issue_body}
+EOF
+)"
+"""
+
+    # Local LESSONS_LEARNED.md entry
+    local_entry = f"""## {today}: {params.title}
+
+- **Issue**: {params.issue}
+- **Root Cause**: {params.root_cause}
+- **Fix**: {params.fix}
+- **Pattern**: {params.pattern}
+- **Applies To**: {params.project_type}
+
+---
+"""
+
+    return f"""# Formatted Lesson: {params.title}
+
+## For Local LESSONS_LEARNED.md
+
+Append this to your project's LESSONS_LEARNED.md:
+
+```markdown
+{local_entry}
+```
+
+## For GitHub Issue (Opt-in Reporting)
+
+Run this command to share with the DevPlanBuilder community:
+
+```bash
+{gh_command}
+```
+
+## Preview
+
+**Title**: Lesson: {params.title}
+**Labels**: lesson-learned, {params.project_type}
+**Body**:
+
+{issue_body}
 """
 
 
