@@ -227,3 +227,57 @@ The goal isn't a perfect verification report - it's working software. Stop when:
 - Remaining issues are cosmetic or low-priority
 
 Ship it, then address remaining items in a future iteration.
+
+---
+
+## Capturing Lessons Learned
+
+After completing verification, capture valuable lessons to improve future projects.
+
+### When to Capture
+
+Capture a lesson when you find an issue that:
+- Could have been prevented with better planning
+- Is likely to recur in similar projects
+- Reveals a pattern that should be documented
+
+### How to Capture
+
+**Option 1: Automatic Extraction**
+```
+Use devplan_extract_lessons_from_report with the verification report to automatically identify potential lessons
+```
+
+**Option 2: Manual Capture**
+Use `devplan_add_lesson` with:
+- issue: What went wrong
+- root_cause: Why it happened
+- fix: How to prevent it
+- pattern: Short identifier
+- project_types: Which project types it applies to
+- severity: critical/warning/info
+
+### Impact
+
+Captured lessons are automatically incorporated into future plan generation:
+1. As a "Lessons Learned Safeguards" section in DEVELOPMENT_PLAN.md
+2. Injected directly into subtask success criteria for relevant tasks
+
+This creates a feedback loop: **Execute → Verify → Capture → Improve → Execute better**
+
+### Example
+
+After finding that empty input crashes a CLI:
+
+```bash
+# The verifier found this issue
+devplan_add_lesson \
+  --issue "CLI crashes on empty string argument" \
+  --root_cause "No guard clause for empty input" \
+  --fix "Add 'if not arg: arg = default_value' guard" \
+  --pattern "empty-input-guard" \
+  --project_types "cli" \
+  --severity "warning"
+```
+
+Future CLI plans will include this safeguard automatically.
