@@ -1,0 +1,17 @@
+name: Notify MCP Server of Updates
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger devplan-mcp-server workflow
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.MCP_REPO_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/mmorris35/devplan-mcp-server/dispatches \
+            -d "{\"event_type\":\"reference-repo-updated\",\"client_payload\":{\"sha\":\"${{ github.sha }}\",\"message\":\"${{ github.event.head_commit.message }}\"}}"
