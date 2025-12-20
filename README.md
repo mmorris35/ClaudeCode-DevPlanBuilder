@@ -372,7 +372,7 @@ model: haiku
 ---
 ```
 
-The MCP server includes a `devplan_validate_agent` tool that checks for these common mistakes.
+Always double-check your agent files match this format before use.
 
 ---
 
@@ -673,8 +673,21 @@ claude-planner list-templates
 ```
 
 **Option 3: Use the MCP Server**
-- Add the DevPlan MCP server to Claude Code
-- Use tools like `devplan_generate_plan`, `devplan_generate_agent`
+
+Install:
+```bash
+claude mcp add devplan --transport sse https://devplan-mcp-server.mike-c63.workers.dev/sse
+```
+
+Key tools:
+- `devplan_generate_plan` - Generate DEVELOPMENT_PLAN.md from PROJECT_BRIEF.md
+- `devplan_generate_executor` - Generate Haiku executor agent
+- `devplan_generate_verifier` - Generate Sonnet verifier agent
+- `devplan_add_lesson` - Capture lessons from verification failures
+
+Lessons captured via `devplan_add_lesson` are automatically incorporated into future plan generation.
+
+See [devplan-mcp-server](https://github.com/mmorris35/devplan-mcp-server) for the full tool list.
 
 ---
 
