@@ -728,4 +728,56 @@ Follow this sequence, and you'll have an industrial-grade development plan that 
 
 ---
 
+## Post-Release Remediation
+
+After your project ships, use these prompts to handle bug fixes and enhancements from GitHub issues.
+
+### Prompt: Generate Remediation Plan from Issue
+
+```
+Fetch GitHub issue #[NUMBER] and use devplan_issue_to_task to generate a remediation plan.
+Append it to DEVELOPMENT_PLAN.md as phase R.1.
+```
+
+### Prompt: Generate Standalone Remediation Plan
+
+```
+Fetch GitHub issue #[NUMBER] and use devplan_issue_to_task to generate a remediation plan.
+Create a new REMEDIATION_PLAN.md file in standalone mode.
+```
+
+### Prompt: Execute Remediation Subtask
+
+```
+Read CLAUDE.md and DEVELOPMENT_PLAN.md, then implement subtask R.1.1.1, following all rules.
+```
+
+Or with the executor agent:
+
+```
+Use the {project}-executor agent to execute subtask R.1.1.1
+```
+
+### Prompt: Batch Multiple Issues
+
+```
+Fetch GitHub issues #[A], #[B], and #[C]. Use devplan_issue_to_task for each one:
+- Issue #[A] as phase R.1
+- Issue #[B] as phase R.2
+- Issue #[C] as phase R.3
+
+Append all phases to DEVELOPMENT_PLAN.md.
+```
+
+### Key Concepts
+
+- **R.X notation**: Remediation phases use `R.1`, `R.2`, etc. to avoid conflicts with existing numbered phases
+- **Append vs Standalone**: Use append mode to add to existing plans, standalone for isolated fixes
+- **Issue classification**: Issues are auto-classified as bug, security, regression, enhancement, etc.
+- **Automatic subtasks**: Generated based on issue type (fix subtask, test subtask, verification subtask for critical issues)
+
+See **[docs/REMEDIATION_WORKFLOW.md](docs/REMEDIATION_WORKFLOW.md)** for the complete guide.
+
+---
+
 **Ready to start? Begin with Step 1 and create your claude.md file!**

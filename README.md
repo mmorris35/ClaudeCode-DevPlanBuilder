@@ -251,6 +251,25 @@ The verifier agent (sonnet) will:
 - **Check error handling** and security basics
 - **Produce a verification report** with pass/fail status
 
+### Step 6: Post-Release Maintenance
+
+After your project ships, use devplan to manage bug fixes and enhancements from GitHub issues:
+
+1. **Fetch the issue**:
+   ```bash
+   gh issue view 123 --json number,title,body,labels,comments,url
+   ```
+
+2. **Generate a remediation task**: Use `devplan_issue_to_task` with the issue JSON
+
+3. **Choose your mode**:
+   - **Append mode**: Add remediation phases (R.1, R.2, etc.) to your existing DEVELOPMENT_PLAN.md
+   - **Standalone mode**: Create a new REMEDIATION_PLAN.md for isolated fixes
+
+4. **Execute subtasks** using the executor agent as usual
+
+See **[docs/REMEDIATION_WORKFLOW.md](docs/REMEDIATION_WORKFLOW.md)** for the complete post-release workflow guide.
+
 ---
 
 ## 🎨 What Makes This "Paint by Numbers"?
