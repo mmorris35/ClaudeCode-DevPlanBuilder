@@ -888,4 +888,4 @@ Go read the README at https://github.com/mmorris35/ClaudeCode-DevPlanBuilder and
 
 ---
 
-**Built with Claude Code • Powered by Anthropic • Open Source MIT License**
+**Built with Claude Code • Powered by Anthropic • [CC-BY-4.0 License](LICENSE)**
